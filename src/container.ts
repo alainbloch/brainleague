@@ -10,6 +10,8 @@ import { NotificationsRepository } from './models/notificationsRepository.js';
 import { TestsRepository } from './models/testsRepository.js';
 import { QuestionsRepository } from './models/questionsRepository.js';
 import { AttemptsRepository } from './models/attemptsRepository.js';
+import { QuestionCategoriesRepository } from './models/questionCategoriesRepository.js';
+import { TutorialsRepository } from './models/tutorialsRepository.js';
 import { SessionService } from './services/sessionService.js';
 import { TokenService } from './services/tokenService.js';
 import { RateLimitService } from './services/rateLimitService.js';
@@ -21,6 +23,7 @@ import { NotificationService } from './services/notificationService.js';
 import { DirectoryService } from './services/directoryService.js';
 import { AdminService } from './services/adminService.js';
 import { QuizEngine } from './services/quizEngine.js';
+import { ContentAdminService } from './services/contentAdminService.js';
 
 export interface ContainerServices {
   sessions: SessionService;
@@ -34,6 +37,7 @@ export interface ContainerServices {
   directory: DirectoryService;
   admin: AdminService;
   quizzes: QuizEngine;
+  contentAdmin: ContentAdminService;
 }
 
 export interface Container {
@@ -50,6 +54,8 @@ export interface Container {
     tests: TestsRepository;
     questions: QuestionsRepository;
     attempts: AttemptsRepository;
+    categories: QuestionCategoriesRepository;
+    tutorials: TutorialsRepository;
   };
   services: ContainerServices;
   /** Test-only convenience shortcuts (set by createTestContainer). */
@@ -88,6 +94,8 @@ interface ContainerOverrides {
   testsRepo?: TestsRepository;
   questionsRepo?: QuestionsRepository;
   attemptsRepo?: AttemptsRepository;
+  categoriesRepo?: QuestionCategoriesRepository;
+  tutorialsRepo?: TutorialsRepository;
   mailer?: MailService | MailLike;
   avatarStorage?: AvatarStorage | AvatarStubLike;
   crypto?: {
@@ -124,6 +132,8 @@ export function buildContainer({
   const testsRepo = overrides.testsRepo || new TestsRepository(db);
   const questionsRepo = overrides.questionsRepo || new QuestionsRepository(db);
   const attemptsRepo = overrides.attemptsRepo || new AttemptsRepository(db);
+  const categoriesRepo = overrides.categoriesRepo || new QuestionCategoriesRepository(db);
+  const tutorialsRepo = overrides.tutorialsRepo || new TutorialsRepository(db);
 
   const sessions = new SessionService({
     sessionsRepo,
@@ -173,6 +183,13 @@ export function buildContainer({
     clock,
   });
   const quizzes = new QuizEngine({ testsRepo, questionsRepo, attemptsRepo, clock });
+  const contentAdmin = new ContentAdminService({
+    testsRepo,
+    questionsRepo,
+    categoriesRepo,
+    tutorialsRepo,
+    clock,
+  });
 
   return {
     db,
@@ -188,6 +205,8 @@ export function buildContainer({
       tests: testsRepo,
       questions: questionsRepo,
       attempts: attemptsRepo,
+      categories: categoriesRepo,
+      tutorials: tutorialsRepo,
     },
     services: {
       sessions,
@@ -201,6 +220,7 @@ export function buildContainer({
       directory,
       admin,
       quizzes,
+      contentAdmin,
     },
     close() {
       closeDatabase(db);

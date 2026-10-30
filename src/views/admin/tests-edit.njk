@@ -1,0 +1,31 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl grid gap-6">
+  <header class="grid gap-1">
+    <h1 class="font-heading text-2xl font-semibold text-ink">Edit test</h1>
+    <p class="text-sm text-muted">Update {{ target.name }}'s catalog entry.</p>
+  </header>
+
+  {% if error %}<div class="mb-4">{{ forms.alert(error, "danger") }}</div>{% endif %}
+
+  <section class="{{ ui.cardClass }}">
+    <form method="post" action="/admin/tests/{{ target.id }}/edit" class="grid gap-4">
+      {{ forms.field("slug", "Slug", { value: values.slug, required: true, hint: "URL-friendly identifier." }) }}
+      {{ forms.field("name", "Name", { value: values.name, required: true }) }}
+      {{ forms.field("publisher", "Publisher", { value: values.publisher, required: true }) }}
+      {{ forms.field("questionCount", "Question count", { type: "number", value: values.questionCount, required: true }) }}
+      {{ forms.field("durationSeconds", "Duration (seconds)", { type: "number", value: values.durationSeconds, required: true }) }}
+      <label class="flex items-center gap-2 text-sm text-ink-soft">
+        <input type="checkbox" name="noGoingBack" value="1" {% if values.noGoingBack %}checked{% endif %} class="size-4" />
+        No going back
+      </label>
+      <div class="flex items-center justify-between">
+        <a href="/admin/tests" class="text-sm text-ink-soft underline-offset-4 hover:underline">← Back to tests</a>
+        <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Save changes</button>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}
