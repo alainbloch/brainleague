@@ -1,0 +1,149 @@
+/*
+  Design tokens and Tailwind theme, ported from rubyminer-core
+  (app/assets/tailwind/application.css). Every colour used by a component
+  comes from these CSS custom properties so a theme change never touches a view.
+
+  Two axes, set as attributes on <html>:
+    data-mode    dark (default) | light  neutrals and status colours
+    data-accent  red (default) | gold | white ...  the one accent colour
+*/
+@import 'tailwindcss';
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-edge: var(--edge);
+  --color-edge-strong: var(--edge-strong);
+  --color-fill: var(--fill);
+  --color-fill-hover: var(--fill-hover);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-press: var(--accent-press);
+  --color-on-accent: var(--on-accent);
+  --color-focus: var(--focus);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  --font-sans: var(--ff-body);
+  --font-heading: var(--ff-heading);
+}
+
+@theme {
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 18px;
+  --radius-pill: 999px;
+
+  --duration-fast: 120ms;
+  --duration-base: 150ms;
+  --duration-slow: 250ms;
+}
+
+:root {
+  --ff-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --ff-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ---- mode: dark is the default ---- */
+:root,
+[data-mode='dark'] {
+  color-scheme: dark;
+  --canvas: #121212;
+  --surface: #1c1c1c;
+  --raised: #262626;
+  --ink: #ffffff;
+  --ink-soft: rgb(255 255 255 / 0.88);
+  --muted: rgb(255 255 255 / 0.62);
+  --edge: rgb(255 255 255 / 0.14);
+  --edge-strong: rgb(255 255 255 / 0.32);
+  --fill: rgb(255 255 255 / 0.07);
+  --fill-hover: rgb(255 255 255 / 0.14);
+  --ok: #2fd6a0;
+  --warn: #ffc23d;
+  --danger: #ff7a7a;
+  --info: #5ec8ff;
+}
+
+[data-mode='light'] {
+  color-scheme: light;
+  --canvas: #f6f6f4;
+  --surface: #ffffff;
+  --raised: #efefed;
+  --ink: #121212;
+  --ink-soft: rgb(18 18 18 / 0.88);
+  --muted: rgb(18 18 18 / 0.62);
+  --edge: rgb(18 18 18 / 0.14);
+  --edge-strong: rgb(18 18 18 / 0.32);
+  --fill: rgb(18 18 18 / 0.05);
+  --fill-hover: rgb(18 18 18 / 0.1);
+  --ok: #0f7a57;
+  --warn: #8a5a00;
+  --danger: #c62a1e;
+  --info: #0b6aa8;
+}
+
+/* ---- accent: one colour, one meaning ---- */
+:root,
+[data-accent='red'] {
+  --accent: #ef3b2c;
+  --accent-hover: #f2584a;
+  --accent-press: #d9322a;
+  --on-accent: #ffffff;
+  --focus: #ef3b2c;
+}
+
+[data-accent='gold'] {
+  --accent: #c9b974;
+  --accent-hover: #d6c884;
+  --accent-press: #b8a862;
+  --on-accent: #171717;
+  --focus: #c9b974;
+}
+
+[data-accent='white'] {
+  --accent: #ffffff;
+  --accent-hover: #e6e6e6;
+  --accent-press: #cccccc;
+  --on-accent: #171717;
+  --focus: #ffffff;
+}
+
+/* BrainLeague brand blue (must match src/public/assets/images/BrainLeague-wordmark.svg). */
+[data-accent='blue'] {
+  --accent: #071b58;
+  --accent-hover: #17317f;
+  --accent-press: #050f3c;
+  --on-accent: #ffffff;
+  --focus: #071b58;
+}
+
+[data-mode='light'][data-accent='red'] {
+  --accent: #c62a1e;
+  --accent-hover: #af2519;
+  --accent-press: #97200f;
+  --on-accent: #ffffff;
+  --focus: #c62a1e;
+}
+
+[data-mode='light'][data-accent='blue'] {
+  --accent: #071b58;
+  --accent-hover: #102c6e;
+  --accent-press: #050f3c;
+  --on-accent: #ffffff;
+  --focus: #071b58;
+}
+
+@layer base {
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--ff-body);
+  }
+}

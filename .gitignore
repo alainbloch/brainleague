@@ -1,0 +1,29 @@
+# Node modules
+node_modules/
+
+# Local runtime data: SQLite database + uploaded avatars. Never commit these;
+# create them at runtime (the app ensures directories exist). `.gitkeep` keeps
+# the folder present in fresh clones.
+data/*
+!data/.gitkeep
+
+# Env files with real credentials
+.env
+.env.local
+.env.production
+
+# Build / runtime output
+dist/
+coverage/
+
+# Notes:
+# - src/public/assets/css/app.min.css is intentionally committed: it is the
+#   runtime stylesheet (built from app.css via `npm run build`), so a fresh
+#   checkout can `npm start` without a build step. The Dockerfile rebuilds it.
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
