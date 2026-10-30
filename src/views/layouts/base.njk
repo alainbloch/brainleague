@@ -54,9 +54,7 @@
             </details>
           {% else %}
             <a href="/login" class="text-ink-soft hover:text-ink underline-offset-4 hover:underline">Sign in</a>
-            <a href="/register">
-              <button type="button" class="{{ ui.buttonClass('primary', 'sm') }}">Create account</button>
-            </a>
+            <a href="/register" class="{{ ui.buttonClass('primary', 'sm') }} nav-create-account">Create account</a>
           {% endif %}
         </nav>
       </div>
