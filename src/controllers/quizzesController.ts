@@ -1,5 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { ContainerServices } from '../container.js';
+import { reasoningVisual } from '../ui/reasoningVisuals.js';
+import { quizCoaching } from '../services/quizCoaching.js';
 import type { SubmitAnswer } from '../services/quizEngine.js';
 
 function errorMessage(error: unknown): string {
@@ -57,7 +59,7 @@ export class QuizzesController {
         startedAt: started.startedAt,
         serverNow: Date.now(),
         deadlineMs: started.startedAt + started.durationSeconds * 1000,
-        questions: started.questions,
+        questions: started.questions.map((q) => ({ ...q, visual: reasoningVisual(q) })),
         noGoingBack: true,
       });
     } catch (error) {
@@ -119,7 +121,11 @@ export class QuizzesController {
     return reply.view('quizzes/result', {
       pageTitle: 'Result',
       user: request.user,
-      report,
+      report: {
+        ...report,
+        questions: report.questions.map((q) => ({ ...q, visual: reasoningVisual(q) })),
+      },
+      coaching: quizCoaching(report, this.quizzes.tests.list()),
       accuracy,
       avgSecondsPerQuestion,
     });
@@ -128,20 +134,17 @@ export class QuizzesController {
 
 /** Validate one decoded submit answer entry into the engine's shape. */
 function parseAnswer(raw: unknown): SubmitAnswer {
-  if (!raw || typeof raw !== 'object')
-    throw new Error('One of the answers was malformed.');
+  if (!raw || typeof raw !== 'object') throw new Error('One of the answers was malformed.');
 
   const { questionId, chosenIndex, timeMs } = raw as Record<string, unknown>;
   if (typeof questionId !== 'string' || !questionId)
     throw new Error('An answer is missing its question.');
 
-  const chosen =
-    chosenIndex === undefined || chosenIndex === null ? null : Number(chosenIndex);
+  const chosen = chosenIndex === undefined || chosenIndex === null ? null : Number(chosenIndex);
   if (chosen !== null && (!Number.isInteger(chosen) || chosen < 0))
     throw new Error('An answer has an invalid choice.');
 
-  const time =
-    timeMs === undefined || timeMs === null ? null : Number(timeMs);
+  const time = timeMs === undefined || timeMs === null ? null : Number(timeMs);
   if (time !== null && Number.isNaN(time)) throw new Error('An answer has an invalid time.');
 
   return { questionId, chosenIndex: chosen, timeMs: time };

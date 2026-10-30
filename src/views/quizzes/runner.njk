@@ -1,0 +1,127 @@
+<script>
+(function () {
+  var views = Array.from(document.querySelectorAll('.question-view'));
+  var next = document.getElementById('next-btn');
+  var skip = document.getElementById('skip-btn');
+  var status = document.getElementById('quiz-status');
+  var progress = document.getElementById('quiz-progress');
+  var timer = document.getElementById('timer');
+  var timerLabel = document.getElementById('timer-label');
+  var answered = [];
+  var index = 0;
+  var selected = null;
+  var submitting = false;
+  var questionStart = performance.now();
+  // Use elapsed monotonic browser time against the server's remaining budget.
+  // Changing the browser's wall clock during the test cannot extend this timer.
+  var remainingAtLoad = Math.max(0, {{ deadlineMs }} - {{ serverNow }});
+  var loadedAt = performance.now();
+  var timerHandle;
+  var saving = false;
+  var savePending = false;
+  var attemptId = {{ attemptId | dump | safe }};
+
+  function remaining() { return remainingAtLoad - (performance.now() - loadedAt); }
+  function spent() { return Math.max(0, Math.round(performance.now() - questionStart)); }
+  function select(choice) {
+    if (submitting || remaining() <= 0) { expire(); return; }
+    selected = Number(choice.dataset.index);
+    views[index].querySelectorAll('.choice').forEach(function (button) {
+      button.setAttribute('aria-pressed', String(button === choice));
+    });
+    next.disabled = false;
+    status.textContent = 'Answer ' + (selected + 1) + ' selected. Press Enter or choose ' + (index === views.length - 1 ? 'Finish test.' : 'Next.');
+  }
+  function render() {
+    views.forEach(function (view, position) { view.hidden = position !== index; });
+    progress.value = index;
+    if (index >= views.length) { submit(); return; }
+    selected = null;
+    next.disabled = true;
+    next.textContent = index === views.length - 1 ? 'Finish test' : 'Next question →';
+    document.getElementById('progress-current').textContent = String(index + 1);
+    status.textContent = 'Choose one answer to continue.';
+    questionStart = performance.now();
+    views[index].querySelector('h2').focus();
+  }
+  function record(choice) {
+    answered.push({ questionId: views[index].dataset.questionId, chosenIndex: choice, timeMs: spent() });
+  }
+  function advance(choice) {
+    if (submitting) return;
+    if (remaining() <= 0) { expire(); return; }
+    record(choice);
+    index++;
+    render();
+    saveProgress();
+  }
+  function saveProgress() {
+    if (submitting) return;
+    if (saving) { savePending = true; return; }
+    saving = true;
+    var body = new URLSearchParams({ answers: JSON.stringify(answered) });
+    fetch('/tests/' + encodeURIComponent(attemptId) + '/progress', {
+      method: 'POST', body: body, credentials: 'same-origin'
+    }).catch(function () {
+      // Final submission includes the full payload if this best-effort save fails.
+    }).finally(function () {
+      saving = false;
+      if (savePending) { savePending = false; saveProgress(); }
+    });
+  }
+  function submit() {
+    if (submitting) return;
+    submitting = true;
+    clearInterval(timerHandle);
+    next.disabled = skip.disabled = true;
+    document.querySelectorAll('.choice').forEach(function (button) { button.disabled = true; });
+    status.textContent = 'Saving your results…';
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = '/tests/' + encodeURIComponent(attemptId) + '/submit';
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'answers';
+    input.value = JSON.stringify(answered);
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+  }
+  function expire() {
+    if (submitting) return;
+    // Selection is only committed by Next; an unfinished question is skipped.
+    if (views[index]) record(null);
+    submit();
+  }
+  function tick() {
+    var milliseconds = remaining();
+    var seconds = Math.max(0, Math.ceil(milliseconds / 1000));
+    timer.textContent = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+    if (milliseconds <= 20000) timerLabel.textContent = 'Final 20 seconds';
+    if (milliseconds <= 0) expire();
+  }
+  views.forEach(function (view, position) {
+    view.querySelectorAll('.choice').forEach(function (button) {
+      button.addEventListener('click', function () { if (position === index) select(button); });
+    });
+  });
+  next.addEventListener('click', function () { if (selected !== null) advance(selected); });
+  skip.addEventListener('click', function () { advance(null); });
+  document.addEventListener('keydown', function (event) {
+    if (submitting || event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+    var target = event.target;
+    if (target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    var choiceIndex = Number(event.key) - 1;
+    if (/^[1-4]$/.test(event.key)) {
+      var button = views[index] && views[index].querySelectorAll('.choice')[choiceIndex];
+      if (button) { event.preventDefault(); select(button); }
+    } else if (event.key === 'Enter' && selected !== null &&
+      (target.matches('.question-view h2, .choice') || target === document.body || target === next)) {
+      event.preventDefault();
+      advance(selected);
+    }
+  });
+  render();
+  if (!submitting) { timerHandle = setInterval(tick, 250); tick(); }
+})();
+</script>
