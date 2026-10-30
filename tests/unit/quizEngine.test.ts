@@ -191,3 +191,71 @@ test('submit: cannot submit another user\'s attempt', () => {
     container.close();
   }
 });
+
+test('saveProgress persists answers; submit grades from them', () => {
+  let t = 1000;
+  const container = makeContainer(() => t);
+  try {
+    const started = container.services.quizzes.start('user-1', 'mini');
+    const answers = [
+      { questionId: started.questions[0].id, chosenIndex: 1, timeMs: 4000 },
+      { questionId: started.questions[2].id, chosenIndex: 0, timeMs: 5000 },
+    ];
+    container.services.quizzes.saveProgress(started.attemptId, 'user-1', answers);
+    assert.equal(container.repos.attempts.answersFor(started.attemptId).length, 2);
+    t = 10_000; // still within deadline
+    const result = container.services.quizzes.submit(started.attemptId, 'user-1', answers);
+    assert.equal(result.correctCount, 1); // q0 correct (index 1)
+    assert.equal(result.reachedCount, 2);
+    assert.equal(result.timedOut, false);
+  } finally { container.close(); }
+});
+
+test('auto-complete: finalizeExpiredUntil grades an abandoned attempt as timed_out', () => {
+  let t = 1000;
+  const container = makeContainer(() => t);
+  try {
+    const started = container.services.quizzes.start('user-1', 'mini');
+    container.services.quizzes.saveProgress(started.attemptId, 'user-1', [
+      { questionId: started.questions[0].id, chosenIndex: 1, timeMs: 5000 },
+    ]);
+    t = 1000 + 61_000;
+    const count = container.services.quizzes.finalizeExpiredUntil(t);
+    assert.equal(count, 1);
+    const stored = container.repos.attempts.findById(started.attemptId)!;
+    assert.equal(stored.status, 'timed_out');
+    assert.equal(stored.correctCount, 1);
+    assert.equal(stored.reachedCount, 1);
+    assert.ok(stored.finishedAt);
+  } finally { container.close(); }
+});
+
+test('start resumes an in-progress attempt within its deadline', () => {
+  let t = 1000;
+  const container = makeContainer(() => t);
+  try {
+    const first = container.services.quizzes.start('user-1', 'mini');
+    t = 1000 + 30_000;
+    const second = container.services.quizzes.start('user-1', 'mini');
+    assert.equal(second.attemptId, first.attemptId);
+    assert.equal(second.startedAt, first.startedAt);
+  } finally { container.close(); }
+});
+
+test('start after deadline finalizes the old attempt and starts a fresh one', () => {
+  let t = 1000;
+  const container = makeContainer(() => t);
+  try {
+    const first = container.services.quizzes.start('user-1', 'mini');
+    container.services.quizzes.saveProgress(first.attemptId, 'user-1', [
+      { questionId: first.questions[0].id, chosenIndex: 1, timeMs: 5000 },
+    ]);
+    t = 1000 + 61_000;
+    const second = container.services.quizzes.start('user-1', 'mini');
+    assert.notEqual(second.attemptId, first.attemptId);
+    assert.equal(second.startedAt, t);
+    const old = container.repos.attempts.findById(first.attemptId)!;
+    assert.equal(old.status, 'timed_out');
+    assert.equal(old.correctCount, 1);
+  } finally { container.close(); }
+});

@@ -174,6 +174,24 @@ export class AttemptsRepository {
       );
   }
 
+  /**
+   * Persist (or overwrite) the full set of recorded answers for an attempt, in
+   * presented order. Used to save progress live during a sitting so an abandoned
+   * test can still be graded when its deadline passes. Replaces the rows so the
+   * server copy always matches what the client has answered so far.
+   */
+  replaceAnswers(attemptId: string, answers: AttemptAnswer[]): void {
+    const del = this.db.prepare('DELETE FROM attempt_answers WHERE attempt_id = ?');
+    const ins = this.db.prepare(
+      `INSERT INTO attempt_answers (attempt_id, question_id, question_index, chosen_index, is_correct, time_ms)
+       VALUES (@attemptId, @questionId, @questionIndex, @chosenIndex, @isCorrect, @timeMs)`,
+    );
+    this.db.transaction(() => {
+      del.run(attemptId);
+      for (const a of answers) ins.run(a);
+    })();
+  }
+
   /** All recorded answers for an attempt, in presented order. */
   answersFor(attemptId: string): AttemptAnswer[] {
     const rows = this.db
@@ -202,6 +220,22 @@ export class AttemptsRepository {
                     finished_at ASC, id ASC`,
         )
         .all(testTypeId) as AttemptRow[]
+    )
+      .map(mapAttempt)
+      .filter((a): a is Attempt => a !== null);
+  }
+
+  /** In-progress attempts whose deadline has passed by `now`. */
+  listExpiredInProgress(now: number): Attempt[] {
+    return (
+      this.db
+        .prepare(
+          `SELECT ${ATTEMPT_COLUMNS} FROM attempts
+           WHERE status = 'in_progress'
+             AND started_at + (SELECT duration_seconds FROM test_types WHERE test_types.id = attempts.test_type_id) * 1000 < ?
+           ORDER BY started_at ASC`,
+        )
+        .all(now) as AttemptRow[]
     )
       .map(mapAttempt)
       .filter((a): a is Attempt => a !== null);

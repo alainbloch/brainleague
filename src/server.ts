@@ -15,6 +15,7 @@ async function main(): Promise<void> {
 
   const shutdown = async (signal: string): Promise<void> => {
     app.log.info(`Received ${signal}, shutting down gracefully...`);
+    clearInterval(autoFinisher);
     try {
       await app.close();
     } finally {
@@ -26,6 +27,17 @@ async function main(): Promise<void> {
 
   process.on('SIGTERM', () => void shutdown('SIGTERM'));
   process.on('SIGINT', () => void shutdown('SIGINT'));
+
+  // Self-complete any abandoned test once its deadline has passed. Run every
+  // ~20s so a user who left mid-test gets their attempt graded (timed_out) and
+  // the leaderboard reflects it without them returning.
+  const autoFinisher = setInterval(() => {
+    try {
+      container.services.quizzes.finalizeExpiredUntil(Date.now());
+    } catch (err) {
+      app.log.error({ err }, 'finalize expired attempts failed');
+    }
+  }, 20_000);
 
   try {
     await app.listen({ port: config.port, host: config.host });

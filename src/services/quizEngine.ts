@@ -116,6 +116,11 @@ export function arrangeQuestions(questions: Question[], bandSize = DEFAULT_BAND_
  *      budget are not credited, and inputs are validated before any write so a
  *      bad submit can never leave a partially-graded attempt.
  * It is HTTP-free: callers pass userId explicitly and read results back.
+ *
+ * Abandoned tests self-complete: answers are persisted as the user answers, and
+ * any in-progress attempt whose deadline has passed is finalized (timed_out) via
+ * finalizeExpiredUntil. start() resumes an in-progress attempt that is still
+ * within its deadline, or starts a fresh one after an earlier attempt expired.
  */
 export class QuizEngine {
   tests: TestsRepository;
@@ -132,7 +137,9 @@ export class QuizEngine {
 
   /**
    * Start (or resume) a timed attempt. Returns ordered questions WITHOUT their
-   * correct indexes and the server-controlled deadline budget.
+   * correct indexes and the server-controlled deadline budget. If the user has
+   * an in-progress attempt that is still within its deadline, resumes it; an
+   * expired attempt is finalized as timed_out and a fresh one is started.
    */
   start(userId: string, testTypeSlug: string): StartResult {
     const test = this.tests.findBySlug(testTypeSlug);
@@ -141,10 +148,15 @@ export class QuizEngine {
       throw new Error('This test has no questions yet.');
     }
 
-    // Resume an in-progress attempt rather than orphaning the previous one.
+    // Resume an in-progress attempt within its deadline. If the active attempt
+    // has passed its deadline, finalize it (auto-complete) before starting fresh.
     const existing = this.attempts.findActiveForUser(userId, test.id);
+    if (existing && this.clock() - existing.startedAt > test.durationSeconds * 1000) {
+      this.finalizeAttempt(existing, test);
+    }
+    const stillActive = this.attempts.findActiveForUser(userId, test.id);
     const attempt =
-      existing ??
+      stillActive ??
       this.attempts.create({
         userId,
         testTypeId: test.id,
@@ -169,6 +181,37 @@ export class QuizEngine {
   }
 
   /**
+   * Persist a user's answers live during a sitting, without finalizing the
+   * attempt. Grading (correct/reached) is computed immediately so an abandoned
+   * test can be auto-completed later. Ownership and the in_progress state are
+   * enforced; a finished attempt cannot be re-saved.
+   */
+  saveProgress(attemptId: string, userId: string, answers: SubmitAnswer[]): void {
+    const attempt = this.attempts.findByIdForUser(attemptId, userId);
+    if (!attempt) throw new Error('Attempt not found for this user.');
+    if (attempt.status !== 'in_progress') {
+      throw new Error('This attempt has already finished.');
+    }
+
+    const test = this.tests.findById(attempt.testTypeId)!;
+    const byQuestion = new Map(this.questions.listForTestType(attempt.testTypeId).map((q) => [q.id, q]));
+    this.#validateAnswers(answers, byQuestion);
+
+    const persisted = answers.map((a, _index) => {
+      const q = byQuestion.get(a.questionId)!;
+      return {
+        attemptId,
+        questionId: a.questionId,
+        questionIndex: _index,
+        chosenIndex: a.chosenIndex,
+        isCorrect: a.chosenIndex !== null && a.chosenIndex === q.correctIndex ? 1 : 0,
+        timeMs: Math.max(0, Math.min(a.timeMs ?? 0, test.durationSeconds * 1000)),
+      };
+    });
+    this.attempts.replaceAnswers(attemptId, persisted);
+  }
+
+  /**
    * Grade and finalize an attempt. Timing is server-authoritative: the test has
    * a fixed budget (durationSeconds) and an answer is credited only if it was
    * reached within that budget — modeled by the cumulative client time spent up
@@ -177,7 +220,12 @@ export class QuizEngine {
   submit(attemptId: string, userId: string, answers: SubmitAnswer[]): AttemptResult {
     const attempt = this.attempts.findByIdForUser(attemptId, userId);
     if (!attempt) throw new Error('Attempt not found for this user.');
-    if (this.attempts.hasAnswers(attemptId)) {
+    if (!this.attempts.hasAnswers(attemptId) && answers.length) {
+      // A submit may arrive with the full answer set even if the client never
+      // called saveProgress (e.g. the very first interaction is a submit).
+      this.saveProgress(attemptId, userId, answers);
+    }
+    if (attempt.status !== 'in_progress') {
       throw new Error('This attempt was already submitted.');
     }
 
@@ -189,16 +237,7 @@ export class QuizEngine {
     const timedOut = now - attempt.startedAt > budgetMs;
 
     // Validate the whole payload first so a bad submit writes nothing.
-    const seen = new Set<string>();
-    for (const a of answers) {
-      if (!byQuestion.has(a.questionId)) {
-        throw new Error('Answer references a question not on this test.');
-      }
-      if (seen.has(a.questionId)) {
-        throw new Error('A question was answered more than once.');
-      }
-      seen.add(a.questionId);
-    }
+    this.#validateAnswers(answers, byQuestion);
 
     // Grade, crediting only answers reached within the test budget. cumulativeMs
     // walks answer-by-answer; once it exceeds the budget, later answers are time
@@ -207,7 +246,7 @@ export class QuizEngine {
     let reachedCount = 0;
     let cumulativeMs = 0;
 
-    answers.forEach((a, index) => {
+    answers.forEach((a) => {
       const q = byQuestion.get(a.questionId)!;
       const clampedTime = Math.max(0, Math.min(a.timeMs ?? 0, budgetMs));
       const withinBudget = cumulativeMs + clampedTime <= budgetMs;
@@ -217,15 +256,6 @@ export class QuizEngine {
 
       if (a.chosenIndex !== null && withinBudget) reachedCount += 1;
       if (isCorrect && withinBudget) correctCount += 1;
-
-      this.attempts.insertAnswer({
-        attemptId,
-        questionId: a.questionId,
-        questionIndex: index,
-        chosenIndex: a.chosenIndex,
-        isCorrect: isCorrect && withinBudget ? 1 : 0,
-        timeMs: clampedTime,
-      });
     });
 
     const elapsedMs = timedOut ? budgetMs : now - attempt.startedAt;
@@ -250,6 +280,39 @@ export class QuizEngine {
   }
 
   /**
+   * Auto-complete every in-progress attempt whose deadline has passed by `now`.
+   * Called on a timer in the server entrypoint and on report access so abandoned
+   * tests wind up graded as timed_out instead of lingering in_progress forever.
+   * Returns the number of attempts finalized.
+   */
+  finalizeExpiredUntil(now: number): number {
+    const expired = this.attempts.listExpiredInProgress(now);
+    for (const attempt of expired) {
+      const test = this.tests.findById(attempt.testTypeId);
+      if (test) this.finalizeAttempt(attempt, test);
+    }
+    return expired.length;
+  }
+
+  /**
+   * Finalize a single in-progress attempt to timed_out based on the answers it
+   * has recorded so far (reached/correct from persisted rows). The attempt's
+   * own state is updated; caller decides when/why this runs.
+   */
+  private finalizeAttempt(attempt: Attempt, test: TestType): void {
+    const answers = this.attempts.answersFor(attempt.id);
+    const reached = answers.filter((a) => a.chosenIndex !== null).length;
+    const correct = answers.filter((a) => a.isCorrect === 1).length;
+    this.attempts.updateAnswers(attempt.id, {
+      correctCount: correct,
+      reachedCount: reached,
+      finishedAt: attempt.startedAt + test.durationSeconds * 1000,
+      elapsedMs: test.durationSeconds * 1000,
+      status: 'timed_out',
+    });
+  }
+
+  /**
    * Compose the result-report for a finished attempt. Ownership is enforced
    * (returns null for an attempt that is not the caller's or not submitted);
    * a 404 hides the attempt's existence from other users. The report replays
@@ -260,7 +323,27 @@ export class QuizEngine {
    */
   report(attemptId: string, userId: string): AttemptReport | null {
     const attempt = this.attempts.findByIdForUser(attemptId, userId);
-    if (!attempt || attempt.status === 'in_progress') return null;
+    if (!attempt) return null;
+
+    // If the user abandoned an in-progress attempt whose deadline has passed,
+    // finalize it before showing the report so they see a completed result.
+    if (attempt.status === 'in_progress') {
+      const test = this.tests.findById(attempt.testTypeId);
+      if (!test) return null;
+      // An in-progress attempt still within its deadline is not a finished
+      // result yet — the owner should keep taking it, not read a report.
+      if (this.clock() - attempt.startedAt <= test.durationSeconds * 1000) return null;
+      // Otherwise the deadline has passed: auto-complete it now so the owner can
+      // see their graded result instead of a redirect back into a dead attempt.
+      this.finalizeAttempt(attempt, test);
+      const updated = this.attempts.findById(attemptId);
+      if (!updated || updated.status === 'in_progress') return null;
+      attempt.finishedAt = updated.finishedAt;
+      attempt.correctCount = updated.correctCount;
+      attempt.reachedCount = updated.reachedCount;
+      attempt.elapsedMs = updated.elapsedMs;
+      attempt.status = updated.status;
+    }
 
     const test = this.tests.findById(attempt.testTypeId)!;
     const byQuestion = new Map(
@@ -305,5 +388,22 @@ export class QuizEngine {
       questionCount: test.questionCount,
       questions,
     };
+  }
+
+  /** Validate the submitted answer set: all on-test, no duplicates. */
+  #validateAnswers(
+    answers: SubmitAnswer[],
+    byQuestion: Map<string, Question>,
+  ): void {
+    const seen = new Set<string>();
+    for (const a of answers) {
+      if (!byQuestion.has(a.questionId)) {
+        throw new Error('Answer references a question not on this test.');
+      }
+      if (seen.has(a.questionId)) {
+        throw new Error('A question was answered more than once.');
+      }
+      seen.add(a.questionId);
+    }
   }
 }

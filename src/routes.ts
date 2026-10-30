@@ -178,6 +178,11 @@ export async function registerRoutes(
     quizzesController.takeTest.bind(quizzesController),
   );
   app.post(
+    '/tests/:attemptId/progress',
+    { preHandler: authMiddleware },
+    quizzesController.saveProgress.bind(quizzesController),
+  );
+  app.post(
     '/tests/:attemptId/submit',
     { preHandler: authMiddleware },
     quizzesController.submitTest.bind(quizzesController),

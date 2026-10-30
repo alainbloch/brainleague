@@ -74,6 +74,20 @@
     answered.push(answer);
     idx += 1;
     render();
+    saveProgress();
+  }
+
+  // Persist answers to the server so an abandoned test can still be graded when
+  // its deadline passes. Debounced gently; fire-and-forget, never blocks the UI.
+  var saveTimer = null;
+  function saveProgress() {
+    var payload = JSON.stringify(answered);
+    if (saveTimer) return; // coalesce bursts
+    saveTimer = setTimeout(function () { saveTimer = null; }, 400);
+    var fd = new FormData();
+    fd.append('answers', payload);
+    fetch('/tests/' + attemptId + '/progress', { method: 'POST', body: fd, credentials: 'same-origin' })
+      .catch(function () { /* best-effort: submission is the authoritative path */ });
   }
 
   // No going back: choosing a choice records the answer and moves on.

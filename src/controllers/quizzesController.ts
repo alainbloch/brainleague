@@ -65,6 +65,23 @@ export class QuizzesController {
     }
   }
 
+  /**
+   * Persist answers during a sitting (debounced by the client) so an abandoned
+   * test can still be graded when its deadline passes. Does not finalize.
+   */
+  async saveProgress(request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
+    const params = request.params as { attemptId?: string };
+    const body = (request.body || {}) as { answers?: unknown };
+    let answers: SubmitAnswer[];
+    try {
+      answers = parseAnswers(body.answers);
+      this.quizzes.saveProgress(params.attemptId!, request.user!.id, answers);
+      return reply.code(204).send();
+    } catch (error) {
+      return reply.code(400).send({ error: errorMessage(error) });
+    }
+  }
+
   /** Accept recorded answers, grade via the engine, notify friends, and land on the report. */
   async submitTest(request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
     const params = request.params as { attemptId?: string };
