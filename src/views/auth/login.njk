@@ -3,15 +3,19 @@
 
 {% block content %}
 <div class="mx-auto max-w-md">
-  <section class="{{ ui.cardClass }}">
-    <h2 class="font-heading text-base font-semibold mb-4">Sign in</h2>
+  <section class="auth-card">
+    <div class="auth-intro">
+      <img src="/assets/images/BrainLeague-emblem.svg" alt="" width="675" height="810" class="auth-emblem" />
+      <h1 class="auth-heading">Welcome back!</h1>
+      <p class="auth-description">Your next brain boost is waiting. Sign in and pick up where you left off.</p>
+    </div>
     {% if error %}
       <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
     {% endif %}
     <form method="post" action="/login" class="grid gap-4">
       {{ forms.field("email", "Email", { type: "email", value: values.email, autocomplete: "email", required: true }) }}
       {{ forms.field("password", "Password", { type: "password", autocomplete: "current-password", required: true }) }}
-      <button type="submit" class="mt-2 w-full {{ ui.buttonClass('primary', 'md') }}">Sign in</button>
+      <button type="submit" class="auth-cta mt-2 w-full {{ ui.buttonClass('primary', 'md') }}">Sign in</button>
     </form>
     <div class="mt-6 text-center text-sm grid gap-2">
       <p><a href="/auth/forgot" class="text-ink-soft hover:text-ink underline-offset-4 hover:underline">Forgot your password?</a></p>
