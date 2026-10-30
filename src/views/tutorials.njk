@@ -1,0 +1,39 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+<div class="grid gap-6">
+  <header class="grid gap-1">
+    <h1 class="font-heading text-2xl font-semibold text-ink">Tips & tutorials</h1>
+    <p class="text-sm text-muted">How to approach each kind of timed-test question, so you spend seconds where they count and beat your friends.</p>
+  </header>
+
+  {% if categories.length %}
+    <nav class="flex flex-wrap gap-2 text-sm" aria-label="Filter by question type">
+      <a href="/tutorials" class="{{ ui.buttonClass('secondary', 'sm') if categorySlug else ui.buttonClass('primary', 'sm') }}">All</a>
+      {% for c in categories %}
+        <a href="/tutorials?category={{ c.slug }}" class="{{ ui.buttonClass('secondary', 'sm') if categorySlug !== c.slug else ui.buttonClass('primary', 'sm') }}">{{ c.name }}</a>
+      {% endfor %}
+    </nav>
+  {% endif %}
+
+  {% if tutorials.length === 0 %}
+    <section class="{{ ui.cardClass }}">
+      <p class="text-sm text-muted">No tutorials for this question type yet.</p>
+    </section>
+  {% else %}
+    <ul class="grid gap-3">
+      {% for item in tutorials %}
+        <li>
+          <a href="/tutorials/{{ item.slug }}" class="block rounded-lg border border-edge bg-surface p-4 hover:border-accent">
+            <div class="flex items-start justify-between gap-3">
+              <h2 class="font-heading text-base font-semibold text-ink">{{ item.title }}</h2>
+              {% if categorySlug %}<span class="shrink-0 text-xs text-muted">{{ item.categorySlug | replace('-', ' ') }}</span>{% endif %}
+            </div>
+            <p class="mt-1 text-sm text-muted">{{ item.body | striptags | truncate(120) }}</p>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+{% endblock %}

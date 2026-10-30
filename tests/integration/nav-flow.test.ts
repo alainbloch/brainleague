@@ -43,9 +43,9 @@ after(async () => { await app.close(); container.close(); });
 
 test('home splash is public, describes the pitch, and links to the first test', async () => {
   const res = await request(app.server as Server).get('/').expect(200);
-  assert.match(res.text, /Run out of time in practice/);
+  assert.match(res.text, /Who's the quickest mind in your crew\?/);
   assert.match(res.text, /PI Cognitive Assessment/);
-  assert.match(res.text, /Take the PI Cognitive Assessment/);
+  assert.match(res.text, /Challenge your friends/);
   assert.match(res.text, /\/tests\/pi-cognitive-assessment\/take/);
   assert.match(res.text, /Leaderboard/);
 });
@@ -76,4 +76,23 @@ test('admin dashboard links to content management (tests, questions, categories,
   for (const href of ['/admin/tests', '/admin/questions', '/admin/categories', '/admin/tutorials']) {
     assert.match(res.text, new RegExp(href));
   }
+});
+
+test('help (tutorials) page lists seeded categories and a category filter works', async () => {
+  const cookie = await signupCookie('Penny', 'penny@example.com');
+  // Seed a tutorial so the page is not empty.
+  container.db.prepare(
+    `INSERT OR IGNORE INTO tutorials (id, category_slug, slug, title, body, sort_order, created_at, updated_at)
+     VALUES ('tg1', 'analogies', 'analogies-help', 'Analogies: spot the relationship', 'Look for part/whole.', 1, ?, ?)`,
+  ).run(Date.now(), Date.now());
+
+  const all = await request(app.server as Server).get('/tutorials').set('Cookie', cookie).expect(200);
+  assert.match(all.text, /Tips & tutorials/);
+  assert.match(all.text, /Analogies/);
+
+  const filtered = await request(app.server as Server).get('/tutorials?category=analogies').set('Cookie', cookie).expect(200);
+  assert.match(filtered.text, /Analogies: spot the relationship/);
+
+  const detail = await request(app.server as Server).get('/tutorials/analogies-help').set('Cookie', cookie).expect(200);
+  assert.match(detail.text, /Look for part\/whole/);
 });

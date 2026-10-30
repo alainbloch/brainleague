@@ -2,9 +2,10 @@ import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { ContainerServices } from '../container.js';
 
 /**
- * Public tutorials: a simple signed-in user-facing list and detail view for the
- * category-keyed tips written by admins. Uses the same ContentAdminService
- * read methods the admin screens do — no HTTP knowledge lives in the service.
+ * Public tutorials: a signed-in user-facing list (optionally filtered by
+ * question category) and a detail view for the category-keyed tips written by
+ * admins. Uses the same ContentAdminService read methods the admin screens do —
+ * no HTTP knowledge lives in the service.
  */
 export class TutorialsController {
   content: ContainerServices['contentAdmin'];
@@ -14,10 +15,19 @@ export class TutorialsController {
   }
 
   async showList(request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
+    const query = (request.query || {}) as { category?: string };
+    const categories = this.content.listCategories();
+    const categorySlug = query.category ?? '';
+    const tutorials = categorySlug
+      ? this.content.listTutorials().filter((t) => t.categorySlug === categorySlug)
+      : this.content.listTutorials();
+
     return reply.view('tutorials', {
       pageTitle: 'Tutorials',
       user: request.user,
-      tutorials: this.content.listTutorials(),
+      tutorials,
+      categories,
+      categorySlug,
     });
   }
 

@@ -2,23 +2,22 @@
 
 {% block content %}
 <div class="grid gap-10">
-  {# Hero -- model the pitch on timedprep.com: run out of time in practice, not on test day. #}
-  <section class="grid gap-4 text-center sm:text-left">
-    <p class="text-xs font-semibold uppercase tracking-widest text-accent">Timed practice for hiring tests</p>
+  {# Hero -- a friendly, competitive brain-test pitch: beat your friends, not the clock alone. #}
+  <section class="mx-auto grid max-w-2xl gap-4 text-center">
+    <p class="text-xs font-semibold uppercase tracking-widest text-accent">Timed brain tests, made for friendly rivalry</p>
     <h1 class="font-heading text-4xl font-bold leading-tight text-ink sm:text-5xl">
-      Run out of time in practice,<br class="hidden sm:block" /> not on test day.
+      Who's the quickest mind in your crew?
     </h1>
-    <p class="mx-auto max-w-xl text-sm leading-relaxed text-muted sm:mx-0">
-      The Wonderlic and PI give you ~14 seconds a question; the CCAT gives you 18.
-      Fewer than 1% of candidates finish. Brain League helps you build the two habits
-      that actually move your score: recognizing question types on sight, and letting
-      go the moment you're stuck. Take a free timed test now, then compete on the
-      leaderboard and train with friends.
+    <p class="mx-auto max-w-xl text-sm leading-relaxed text-muted">
+      Answer as many questions as you can before the clock runs out, then see how you
+      stack up against your friends on the leaderboard. Every test is real format, real
+      pace — built so quick thinking and knowing the question types beat grinding. Take a
+      round, get your score, and one-up your crew.
     </p>
-    <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
+    <div class="flex flex-wrap justify-center gap-3">
       {% if tests.length %}
         <a href="/tests/{{ tests[0].slug }}/take">
-          <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Take the {{ tests[0].name }} →</button>
+          <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Challenge your friends →</button>
         </a>
       {% endif %}
       <a href="/tests">
@@ -27,9 +26,9 @@
     </div>
   </section>
 
-  {# Test catalog cards, modeled on timedprep's grid. #}
+  {# Test catalog cards. #}
   <section class="grid gap-4">
-    <h2 class="font-heading text-xl font-semibold text-ink">Which test were you invited to?</h2>
+    <h2 class="font-heading text-xl font-semibold text-ink">Pick a brain test and go head-to-head</h2>
     {% if not tests.length %}
       <p class="text-sm text-muted">No practice tests are available yet. Check back soon.</p>
     {% else %}
@@ -72,9 +71,9 @@
   {# How it works + value props. #}
   <section class="grid gap-4 sm:grid-cols-3">
     {% for feature in [
-      { title: "Built to run out of time", body: "Practice the real formats at the real pace, so the clock is familiar on test day." },
-      { title: "Know the question types", body: "Tips and tutorials on sight-recognizing analogies, word problems, figure series and more." },
-      { title: "Compete with friends", body: "Friend leaderboards and result alerts keep practice social and honest." }
+      { title: "Real pace, real pressure", body: "Practice at test speed so the clock feels familiar — out-answer your friends where it counts." },
+      { title: "Learn the question types", body: "Get tips on spotting analogies, word problems, number series and more before they eat your time." },
+      { title: "Compete with your crew", body: "Friend leaderboards and score alerts turn solo prep into a running battle with the people you know." }
     ] %}
       <section class="{{ ui.cardClass }}">
         <h4 class="font-heading text-sm font-semibold text-ink">{{ feature.title }}</h4>

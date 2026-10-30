@@ -174,6 +174,64 @@ const TEST = {
   ] as FreeTextChoice[],
 };
 
+const TUTORIALS: Array<{ category: string; slug: string; title: string; body: string; order: number }> = [
+  { category: 'analogies', slug: 'analogies', title: 'Analogies: spot the relationship', order: 1, body: `Analogies ask you to find the same relationship between two words in all four.
+
+1. Put the given pair into a sentence: "a finger is PART of a hand".
+2. Test each option with the same sentence form.
+3. If the first pair reads naturally in one way but not another, the exact phrasing is usually the answer.
+
+Common patterns: part/whole, cause/effect, tool/action, category/member. When two options both seem plausible, the one that keeps the SAME part of speech and the SAME relationship order wins.` },
+  { category: 'antonyms', slug: 'antonyms', title: 'Antonyms: find the opposite', order: 2, body: `Pick the word most nearly OPPOSITE in meaning.
+
+1. Define the target word in your head before looking at choices.
+2. Work by elimination: cross out synonyms and near-synonyms first.
+3. A good opposite usually lives in the same "register" (formal/plain) as the target and is one clear step away, not a mere difference.
+
+Watch out for distractors that mean something similar to the OPPOSITE of the opposite — that is, a synonym dressed up. If you know only whether a word is positive or negative, that polarity alone often knocks out half the options.` },
+  { category: 'sentence-completion', slug: 'sentence-completion', title: 'Sentence completion: let the clues lead', order: 3, body: `Fill the blank so the sentence stays logical.
+
+1. Read the full sentence first; don't just grab the blank.
+2. Identify the signal word — "but"/"however" (contrast), "therefore"/"since" (cause), "and"/"also" (agreement). The blank usually continues or reverses what came before.
+3. Insert each option in your head and read the whole sentence aloud quietly. The right one makes the sentence read naturally and logically.
+
+Your first instinct is usually right. Don't overthink and second-guess into a wrong trap.` },
+  { category: 'arithmetic', slug: 'arithmetic', title: 'Arithmetic: work it fast and check once', order: 4, body: `Timed tests reward speed on basic arithmetic.
+
+1. Do the calculation step by step on scratch and keep numbers tidy.
+2. Use shortcuts: percentages are easiest as $X$ of $10$ is just move the decimal; a 25% discount is divide by 4.
+3. Estimate first: if the answer choices span orders of magnitude, a rough estimate eliminates most without a full calculation.
+
+Round-trip check on your final digit and decimal place before committing. A single sign slip is the most common error.` },
+  { category: 'word-problems', slug: 'word-problems', title: 'Word problems: decode, translate, solve', order: 5, body: `Word problems hide math inside sentences.
+
+1. Underline the numbers and the ask (what are you solving?).
+2. Translate the sentence into an equation: "twice as old as" -> $x$ and $2x$; "total" -> sum; "per" -> division.
+3. Ignore the story and solve the math.
+
+If two answer choices are just swapped values (e.g. 3 and 4), the trap is reversing a ratio or a rate. Define your variable clearly so you don't solve for the wrong quantity.` },
+  { category: 'number-series', slug: 'number-series', title: 'Number series: find the step', order: 6, body: `A number series hides a rule between each term.
+
+1. Compute the DIFFERENCES between consecutive terms first.
+2. Differences constant? -> arithmetic. Differences themselves growing by a fixed amount? -> quadratic. Ratios constant? -> geometric.
+3. Occasionally alternate two rules by position (every other term follows its own pattern).
+
+Most timed-test series use one of three: adding a value, multiplying, or alternating a pair. Find the step, extend it once, and you have the answer.` },
+  { category: 'odd-one-out', slug: 'odd-one-out', title: 'Odd one out: name the category', order: 7, body: `Find the item that does not belong.
+
+1. Ask "what do all but one share?" — category, property, relationship.
+2. There is always a defensible rule that groups the other three; the odd one breaks it.
+3. If two rules seem to fit different answer choices, pick the most concrete/obvious category (concrete nouns beat abstract attributes).
+
+Don't force it. The three similar items usually share an easy-to-name trait; the odd one differs on exactly that trait.` },
+  { category: 'figure-series', slug: 'figure-series', title: 'Figure series: describe the transformation', order: 8, body: `Figure series test pattern perception.
+
+1. Describe the change from one frame to the next in words: rotation, growth, color, count, position.
+2. Apply the SAME rule to the last frame to predict the next.
+3. Often more than one change happens at once (rotate AND grow); track each separately.
+
+If a frame repeats, the next frame in the sequence reuses the transformation, not a brand-new one. Rule out by elimination frame by frame.` },
+];
 function run(): void {
   const container = buildContainer();
   const db = container.db;
@@ -232,7 +290,29 @@ function run(): void {
         if (res.changes > 0) added += 1;
       });
 
+      // Tutorials / help content keyed by category
+      let tutorialsAdded = 0;
+      const insertTutorial = db.prepare(
+        `INSERT OR IGNORE INTO tutorials (id, category_slug, slug, title, body, sort_order, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      );
+      TUTORIALS.forEach((t) => {
+        const id = `tutorial-${t.slug}`;
+        const res = insertTutorial.run(
+          id,
+          t.category,
+          t.slug,
+          t.title,
+          t.body,
+          t.order,
+          Date.now(),
+          Date.now(),
+        );
+        if (res.changes > 0) tutorialsAdded += 1;
+      });
+
       console.log(`Seed: ${added} questions added (${TEST.questions.length} in bank).`);
+      if (tutorialsAdded > 0) console.log(`Seed: ${tutorialsAdded} tutorials added.`);
     })();
 
     console.log(
