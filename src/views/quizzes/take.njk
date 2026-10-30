@@ -28,7 +28,7 @@
             {% endfor %}
           </div>
           <div class="flex justify-between">
-            <button type="button" id="skip-btn" class="{{ ui.buttonClass('tertiary', 'md') }}">Skip — I can't answer this</button>
+            <button type="button" class="skip-btn {{ ui.buttonClass('tertiary', 'md') }}">Skip — I can't answer this</button>
           </div>
         </div>
       {% endfor %}
@@ -47,7 +47,6 @@
   var progressTotal = document.getElementById('progress-total');
   var timerEl = document.getElementById('timer');
   var timerLabel = document.getElementById('timer-label');
-  var skipBtn = document.getElementById('skip-btn');
   var answered = []; // [{ questionId, chosenIndex, timeMs }]
   var idx = 0;
   var questionStart = Date.now();
@@ -90,29 +89,25 @@
       .catch(function () { /* best-effort: submission is the authoritative path */ });
   }
 
-  // No going back: choosing a choice records the answer and moves on.
-  views.forEach(function (v) {
+  // Each view knows its own position; only the current view accepts input.
+  // A skipped question records chosenIndex null and is final (no going back).
+  views.forEach(function (v, viewIndex) {
     var questionId = v.getAttribute('data-question-id');
-    var choices = v.querySelectorAll('.choice');
-    choices.forEach(function (btn) {
+    var respond = function (chosenIndex) {
+      if (viewIndex !== idx) return; // stale view or already advanced
+      advance({
+        questionId: questionId,
+        chosenIndex: chosenIndex,
+        timeMs: Date.now() - questionStart
+      });
+    };
+    v.querySelectorAll('.choice').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var chosenIndex = Number(btn.getAttribute('data-index'));
-        advance({
-          questionId: questionId,
-          chosenIndex: chosenIndex,
-          timeMs: Date.now() - questionStart
-        });
+        respond(Number(btn.getAttribute('data-index')));
       });
     });
-  });
-
-  skipBtn.addEventListener('click', function () {
-    var v = views[idx];
-    advance({
-      questionId: v.getAttribute('data-question-id'),
-      chosenIndex: null,
-      timeMs: Date.now() - questionStart
-    });
+    var skip = v.querySelector('.skip-btn');
+    if (skip) skip.addEventListener('click', function () { respond(null); });
   });
 
   function submit() {
