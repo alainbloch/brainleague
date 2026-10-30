@@ -13,6 +13,7 @@
     <div class="rounded-lg border border-edge bg-surface p-6 text-sm leading-relaxed text-ink-soft prose prose-sm">
       {{ tutorial.body | escape | replace('\n', '<br />') | safe }}
     </div>
+    <a href="/tests" class="{{ ui.buttonClass('primary', 'md') }}">Try a practice test →</a>
   </article>
 </div>
 {% endblock %}

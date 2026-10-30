@@ -339,3 +339,45 @@ All application code is TypeScript, compiled with `tsc` to `dist/` for
 production (see the Dockerfile). `npm run typecheck` checks the whole codebase
 including tests. See `AGENTS.md` for the full architecture and code-quality
 requirements.
+
+
+## Practice tests and learning content
+
+After deploying the code, install the content against the persistent database:
+
+```sh
+npm run migrate
+npm run seed:content
+```
+
+For the production build (including Railway), run
+`node dist/scripts/seed-content.js` in the deployed container with the same
+`DATABASE_PATH` and mounted volume as the app, after migrations. Redeploying code
+alone does not seed the database. Do not reset the database to install content.
+
+The shipped catalog includes:
+
+| Test | Questions | Time |
+| --- | ---: | ---: |
+| PI Cognitive Assessment practice | 50 | 12 minutes |
+| Numerical Workout | 20 | 10 minutes |
+| Verbal Workout | 20 | 7 minutes |
+| Pattern & Logic Workout | 20 | 8 minutes |
+
+There are 60 new original questions across the focused workouts; the mixed test
+also uses 34 of those questions alongside its 16 original questions. These are
+practice exercises, not official assessment items or validated IQ measurements.
+Figure exercises describe transformations in words. Twelve tutorials cover the
+nine question categories plus rates, percentage changes, and pacing, with worked
+solutions, common mistakes, and self-check answers. Result reviews show each
+question's explanation and link to category tutorials.
+
+Content lives in `scripts/content/`: typed question banks and `catalog.ts` define
+the tests, `tutorials.ts` defines teaching material, and `seed.ts` owns the atomic
+SQLite import. `legacy.ts` preserves old IDs and exact tutorial text for guarded
+upgrades. The CLI only opens the configured database and calls the importer.
+Re-running inserts missing records without duplicates. It upgrades a legacy
+tutorial only if its title, body, category, and order still match the shipped
+original; admin-edited tutorials and existing questions remain untouched. No
+users, scores, or attempts are deleted. The current engine presents a test's
+entire bank, so keep each bank's size aligned with its advertised question count.
