@@ -1,0 +1,53 @@
+{# Decorative vectors share the supplied emblem's palette through homepage tokens. #}
+{% macro graphic(kind) %}
+<svg viewBox="0 0 160 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" class="home-icon">
+  <circle cx="80" cy="74" r="58" fill="var(--brand-blue)" opacity=".08" />
+  <g stroke="var(--brand-navy)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+  {% if kind == 'timer' %}
+    <path d="M69 17h22M80 17v15m35 7 8-8" />
+    <circle cx="80" cy="80" r="46" fill="var(--brand-paper)" />
+    <path d="M80 45a35 35 0 0 1 35 35H80Z" fill="var(--brand-gold)" stroke="none" />
+    <path d="M80 52v28l-17 13" />
+    <circle cx="80" cy="80" r="5" fill="var(--brand-orange)" stroke="none" />
+    <path d="M25 53H12m12 22H5m20 22H12" stroke="var(--brand-blue)" />
+  {% elif kind == 'patterns' %}
+    <rect x="23" y="27" width="50" height="50" rx="12" fill="var(--brand-blue)" />
+    <rect x="85" y="27" width="50" height="50" rx="12" fill="var(--brand-paper)" />
+    <rect x="23" y="89" width="50" height="40" rx="12" fill="var(--brand-paper)" />
+    <rect x="85" y="89" width="50" height="40" rx="12" fill="var(--brand-gold)" />
+    <path d="M37 52h22m-11-11v22" stroke="var(--brand-paper)" />
+    <path d="m110 39 13 13-13 13-13-13Z" fill="var(--brand-orange)" stroke="none" />
+    <circle cx="48" cy="109" r="9" stroke="var(--brand-blue)" />
+    <path d="m100 109 7 7 14-15" />
+  {% elif kind == 'podium' %}
+    <path d="M20 126V85h38v41M58 126V62h43v64m0 0V96h38v30" fill="var(--brand-blue)" />
+    <path d="M58 126V62h43v64" fill="var(--brand-gold)" />
+    <path d="M101 126V96h38v30" fill="var(--brand-orange)" />
+    <path d="M13 126h133M80 84v21" />
+    <path d="m60 24 10 9 10-17 10 17 10-9-5 24H65Z" fill="var(--brand-gold)" />
+    <path d="m31 43-5-7m102 15 7-5" stroke="var(--brand-orange)" />
+  {% else %}
+    <rect x="39" y="22" width="92" height="105" rx="14" fill="var(--brand-blue)" transform="rotate(9 85 75)" />
+    <rect x="26" y="17" width="92" height="105" rx="14" fill="var(--brand-paper)" />
+    <path d="M45 44h33m-33 19h52M45 82h28" />
+    <circle cx="106" cy="105" r="25" fill="var(--brand-gold)" />
+    <path d="m100 94 15 11-15 11Z" fill="var(--brand-navy)" stroke-width="3" />
+  {% endif %}
+  </g>
+</svg>
+{% endmacro %}
+
+{% macro hero() %}
+<div class="home-hero-art" aria-hidden="true">
+  <div class="home-orbit home-orbit-outer"></div>
+  <div class="home-orbit home-orbit-inner"></div>
+  <span class="home-spark home-spark-blue"></span>
+  <span class="home-spark home-spark-orange"></span>
+  <div class="home-emblem-disc">
+    <img src="/assets/images/BrainLeague-emblem.svg" alt="" width="675" height="810" class="home-emblem" />
+  </div>
+  <div class="home-art-chip home-art-chip-timer">{{ graphic('timer') }}<span>Beat the clock</span></div>
+  <div class="home-art-chip home-art-chip-rank">{{ graphic('podium') }}<span>Climb the ranks</span></div>
+  <div class="home-art-tile">{{ graphic('patterns') }}</div>
+</div>
+{% endmacro %}

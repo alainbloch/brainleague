@@ -1,40 +1,45 @@
 {% extends "layouts/base.njk" %}
+{% from "components/home-graphics.njk" import graphic, hero %}
 
 {% block content %}
 <div class="grid max-w-5xl mx-auto">
-  {# Hero — editorial type-led pitch. #}
-  <section class="border-b border-edge py-20 sm:py-28">
-    <p class="mb-4 text-sm font-medium tracking-tight text-muted">Brain League · friends competing on timed brain tests</p>
-    <h1 class="max-w-3xl font-heading text-5xl font-medium leading-[1.05] tracking-[-0.03em] text-ink sm:text-6xl">
-      Who is the quickest mind in your crew?
-    </h1>
-    <p class="mt-6 max-w-xl text-base leading-relaxed text-muted">
-      Answer as many questions as you can before the clock runs out, then see how you
-      stack up against your friends. Real format, real pace — quick thinking and knowing
-      the question types beat grinding. Take a round, get your score, one-up your crew.
-    </p>
-    <div class="mt-10 flex flex-wrap items-center gap-3">
-      {% if tests.length %}
-        <a href="/tests/{{ tests[0].slug }}/take">
-          <button type="button" class="{{ ui.buttonClass('primary', 'md') }} px-6">Take the {{ tests[0].name }} →</button>
+  {# Hero pairs the pitch with the supplied BrainLeague emblem. #}
+  <section class="home-hero border-b border-edge py-20 sm:py-28">
+    <div class="home-hero-copy">
+      <p class="mb-4 text-sm font-medium tracking-tight text-muted">Brain League · friends competing on timed brain tests</p>
+      <h1 class="max-w-3xl font-heading text-5xl font-medium leading-[1.05] tracking-[-0.03em] text-ink sm:text-6xl">
+        Who is the quickest mind in your crew?
+      </h1>
+      <p class="mt-6 max-w-xl text-base leading-relaxed text-muted">
+        Answer as many questions as you can before the clock runs out, then see how you
+        stack up against your friends. Real format, real pace — quick thinking and knowing
+        the question types beat grinding. Take a round, get your score, one-up your crew.
+      </p>
+      <div class="mt-10 flex flex-wrap items-center gap-3">
+        {% if tests.length %}
+          <a href="/tests/{{ tests[0].slug }}/take">
+            <button type="button" class="{{ ui.buttonClass('primary', 'md') }} px-6">Take the {{ tests[0].name }} →</button>
+          </a>
+        {% endif %}
+        <a href="/tests">
+          <button type="button" class="{{ ui.buttonClass('secondary', 'md') }} px-6">Browse all tests</button>
         </a>
-      {% endif %}
-      <a href="/tests">
-        <button type="button" class="{{ ui.buttonClass('secondary', 'md') }} px-6">Browse all tests</button>
-      </a>
+      </div>
     </div>
+    {{ hero() }}
   </section>
 
   {# Feature sections — editorial numbered blocks. #}
   <section class="grid gap-14 py-16 sm:py-20">
     {% for f in [
-      { num: '01', title: 'Built for timed tests, made for rivalry', body: 'Practice at the real pace so the clock feels familiar. Then put your score on the leaderboard and see exactly who beats who — your friends, your rivals, everyone.' },
-      { num: '02', title: 'Learn the question types on sight', body: 'Analogies, word problems, number series and more. Tease apart how each one works, so you recognize them fast and let go the moment you are stuck.' },
-      { num: '03', title: 'Compete, track, and improve together', body: 'Friend leaderboards and score alerts turn solo prep into a running battle. Watch your rank climb as you one-up the people you know.' }
+      { num: '01', graphic: 'timer', title: 'Built for timed tests, made for rivalry', body: 'Practice at the real pace so the clock feels familiar. Then put your score on the leaderboard and see exactly who beats who — your friends, your rivals, everyone.' },
+      { num: '02', graphic: 'patterns', title: 'Learn the question types on sight', body: 'Analogies, word problems, number series and more. Tease apart how each one works, so you recognize them fast and let go the moment you are stuck.' },
+      { num: '03', graphic: 'podium', title: 'Compete, track, and improve together', body: 'Friend leaderboards and score alerts turn solo prep into a running battle. Watch your rank climb as you one-up the people you know.' }
     ] %}
       <div class="grid gap-6 sm:grid-cols-12 sm:gap-10">
-        <div class="sm:col-span-3">
+        <div class="home-feature-art sm:col-span-3">
           <p class="text-sm font-medium tracking-tight text-muted">{{ f.num }}</p>
+          {{ graphic(f.graphic) }}
         </div>
         <div class="sm:col-span-8">
           <h2 class="font-heading text-2xl font-medium tracking-[-0.02em] text-ink sm:text-3xl">{{ f.title }}</h2>
@@ -47,8 +52,9 @@
   {# Test catalog — the available rounds. #}
   <section class="border-t border-edge py-16 sm:py-20">
     <div class="grid gap-6 sm:grid-cols-12 sm:gap-10">
-      <div class="sm:col-span-3">
+      <div class="home-feature-art sm:col-span-3">
         <p class="text-sm font-medium tracking-tight text-muted">Available</p>
+        {{ graphic("tests") }}
       </div>
       <div class="sm:col-span-8">
         <h2 class="font-heading text-2xl font-medium tracking-[-0.02em] text-ink sm:text-3xl">
