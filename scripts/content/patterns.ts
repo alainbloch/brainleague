@@ -1,0 +1,203 @@
+import type { PracticeQuestion } from './types.js';
+
+export const patternsQuestions: PracticeQuestion[] = [
+  {
+    key: 'patterns-01',
+    category: 'number-series',
+    prompt: 'Continue the rule: 4, 9, 14, 19, ______.',
+    choices: ['23', '24', '25', '29'],
+    correct: 1,
+    explanation: 'Add 5 each time: 19 + 5 = 24.',
+    estSeconds: 14,
+  },
+  {
+    key: 'patterns-02',
+    category: 'number-series',
+    prompt: 'Continue the rule: 3, 9, 27, 81, ______.',
+    choices: ['162', '108', '243', '324'],
+    correct: 2,
+    explanation: 'Multiply by 3 each time: 81 × 3 = 243.',
+    estSeconds: 18,
+  },
+  {
+    key: 'patterns-03',
+    category: 'number-series',
+    prompt: 'Continue the rule: 1, 4, 9, 16, 25, ______.',
+    choices: ['36', '30', '35', '49'],
+    correct: 0,
+    explanation:
+      'These are consecutive squares: 1² through 5². Next is 6² = 36. The differences are consecutive odd numbers.',
+    estSeconds: 20,
+  },
+  {
+    key: 'patterns-04',
+    category: 'number-series',
+    prompt: 'Continue the rule: 2, 6, 12, 20, 30, ______.',
+    choices: ['40', '44', '36', '42'],
+    correct: 3,
+    explanation: 'Differences are 4, 6, 8, 10. Add the next difference, 12, to get 42.',
+    estSeconds: 24,
+  },
+  {
+    key: 'patterns-05',
+    category: 'number-series',
+    prompt: 'Continue the rule: 3, 7, 15, 31, ______.',
+    choices: ['62', '63', '47', '64'],
+    correct: 1,
+    explanation: 'Multiply by 2 and add 1 at each step. 31 × 2 + 1 = 63.',
+    estSeconds: 26,
+  },
+  {
+    key: 'patterns-06',
+    category: 'number-series',
+    prompt: 'Continue the rule: 2, 10, 4, 20, 6, 30, ______.',
+    choices: ['40', '12', '8', '60'],
+    correct: 2,
+    explanation:
+      'Separate odd positions (2, 4, 6, 8) from even positions (10, 20, 30). The next position is odd, so it is 8.',
+    estSeconds: 28,
+  },
+  {
+    key: 'patterns-07',
+    category: 'number-series',
+    prompt: 'Continue the rule: 96, 48, 24, 12, ______.',
+    choices: ['6', '8', '4', '0'],
+    correct: 0,
+    explanation: 'Halve each term: 12 / 2 = 6.',
+    estSeconds: 14,
+  },
+  {
+    key: 'patterns-08',
+    category: 'number-series',
+    prompt: 'Continue the rule: 5, 8, 14, 26, ______.',
+    choices: ['38', '48', '52', '50'],
+    correct: 3,
+    explanation: 'Differences double: 3, 6, 12, then 24. Therefore 26 + 24 = 50.',
+    estSeconds: 28,
+  },
+  {
+    key: 'patterns-09',
+    category: 'number-series',
+    prompt: 'Using increasing alphabet jumps, what comes next: A, C, F, J, O, ______?',
+    choices: ['T', 'U', 'V', 'S'],
+    correct: 1,
+    explanation:
+      'Letter positions are 1, 3, 6, 10, 15. Jumps are 2, 3, 4, 5, then 6: position 21 is U.',
+    estSeconds: 30,
+  },
+  {
+    key: 'patterns-10',
+    category: 'number-series',
+    prompt: 'Using the repeating rule +3, then ×2, continue: 4, 7, 14, 17, 34, ______.',
+    choices: ['68', '40', '37', '35'],
+    correct: 2,
+    explanation: 'The next operation after ×2 is +3. Add 3 to 34 to get 37.',
+    estSeconds: 22,
+  },
+  {
+    key: 'patterns-11',
+    category: 'odd-one-out',
+    prompt: 'Which number is not a perfect square?',
+    choices: ['18', '16', '25', '36'],
+    correct: 0,
+    explanation: '16 = 4², 25 = 5² and 36 = 6². The number 18 is not the square of an integer.',
+    estSeconds: 20,
+  },
+  {
+    key: 'patterns-12',
+    category: 'odd-one-out',
+    prompt: 'Which shape is not a quadrilateral?',
+    choices: ['Rectangle', 'Rhombus', 'Trapezoid', 'Triangle'],
+    correct: 3,
+    explanation:
+      'A quadrilateral has four sides. A triangle has three; the other named shapes each have four.',
+    estSeconds: 16,
+  },
+  {
+    key: 'patterns-13',
+    category: 'odd-one-out',
+    prompt: 'Which number is not a multiple of 6?',
+    choices: ['18', '28', '30', '42'],
+    correct: 1,
+    explanation: '18, 30 and 42 equal 6 × 3, 6 × 5 and 6 × 7. The number 28 is not divisible by 6.',
+    estSeconds: 20,
+  },
+  {
+    key: 'patterns-14',
+    category: 'odd-one-out',
+    prompt: 'Which item is not a unit of length?',
+    choices: ['Meter', 'Kilometer', 'Liter', 'Centimeter'],
+    correct: 2,
+    explanation: 'A liter measures volume. The other three units measure length.',
+    estSeconds: 16,
+  },
+  {
+    key: 'patterns-15',
+    category: 'odd-one-out',
+    prompt: 'Which letter does not have vertical mirror symmetry in standard block capitals?',
+    choices: ['F', 'A', 'H', 'M'],
+    correct: 0,
+    explanation:
+      'A, H and M match their reflections across a vertical center line in standard block forms. F does not.',
+    estSeconds: 24,
+  },
+  {
+    key: 'patterns-16',
+    category: 'figure-series',
+    prompt:
+      'An arrow points up, then right, then down, then left. With the same quarter-turn each step, where does it point next?',
+    choices: ['Left', 'Down', 'Right', 'Up'],
+    correct: 3,
+    explanation: 'Each step rotates 90 degrees clockwise. From left the next direction is up.',
+    estSeconds: 18,
+  },
+  {
+    key: 'patterns-17',
+    category: 'figure-series',
+    prompt:
+      'Frames show 1 filled circle, 2 outline circles, 3 filled circles, 4 outline circles. Continue both patterns.',
+    choices: ['4 filled circles', '5 filled circles', '5 outline circles', '6 filled circles'],
+    correct: 1,
+    explanation:
+      'Count increases by one each frame; fill alternates. After four outline circles come five filled circles.',
+    estSeconds: 26,
+  },
+  {
+    key: 'patterns-18',
+    category: 'figure-series',
+    prompt:
+      'A marker moves around four corners: top-left, top-right, bottom-right, bottom-left. Where is it next?',
+    choices: ['Top-right', 'Bottom-right', 'Top-left', 'Center'],
+    correct: 2,
+    explanation:
+      'The marker travels clockwise around the corners and returns to top-left after bottom-left.',
+    estSeconds: 20,
+  },
+  {
+    key: 'patterns-19',
+    category: 'figure-series',
+    prompt:
+      'A triangle points up and is black; then right and white; then down and black. With clockwise quarter-turns and alternating colors, what is next?',
+    choices: ['Left and white', 'Left and black', 'Up and white', 'Right and black'],
+    correct: 0,
+    explanation:
+      'Track direction and color separately: down turns to left; black alternates to white.',
+    estSeconds: 28,
+  },
+  {
+    key: 'patterns-20',
+    category: 'figure-series',
+    prompt:
+      'A row shows [circle, square, triangle]. Each step moves the leftmost shape to the right end. What is the row after two steps?',
+    choices: [
+      'square, triangle, circle',
+      'circle, triangle, square',
+      'triangle, square, circle',
+      'triangle, circle, square',
+    ],
+    correct: 3,
+    explanation:
+      'After one step: square, triangle, circle. After two: triangle, circle, square. Keep the order of the remaining shapes.',
+    estSeconds: 28,
+  },
+];

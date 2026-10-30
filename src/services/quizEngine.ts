@@ -50,6 +50,7 @@ export interface ReportQuestion {
   choices: string[];
   categorySlug: string;
   correctIndex: number;
+  explanation: string;
   chosenIndex: number | null;
   /** 1 when the answer was correct AND reached within the test budget. */
   isCorrect: number;
@@ -370,6 +371,7 @@ export class QuizEngine {
         choices: q?.choices ?? [],
         categorySlug: q?.categorySlug ?? '',
         correctIndex: q?.correctIndex ?? -1,
+        explanation: q?.explanation ?? '',
         chosenIndex: a.chosenIndex,
         isCorrect: a.isCorrect,
         timeMs,

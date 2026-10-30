@@ -95,6 +95,9 @@
               {% endif %}
             {% endfor %}
           </ul>
+          {% if q.explanation %}
+            <p class="mt-2 text-sm text-ink-soft"><strong>Why:</strong> {{ q.explanation }}</p>
+          {% endif %}
           <p class="mt-2 text-xs text-muted">Expected ~{{ q.estSeconds }}s</p>
         </li>
       {% endfor %}
