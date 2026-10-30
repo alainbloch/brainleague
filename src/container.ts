@@ -7,6 +7,9 @@ import { RateLimitsRepository } from './models/rateLimitsRepository.js';
 import { EmailChangesRepository } from './models/emailChangesRepository.js';
 import { FriendshipsRepository } from './models/friendshipsRepository.js';
 import { NotificationsRepository } from './models/notificationsRepository.js';
+import { TestsRepository } from './models/testsRepository.js';
+import { QuestionsRepository } from './models/questionsRepository.js';
+import { AttemptsRepository } from './models/attemptsRepository.js';
 import { SessionService } from './services/sessionService.js';
 import { TokenService } from './services/tokenService.js';
 import { RateLimitService } from './services/rateLimitService.js';
@@ -17,6 +20,7 @@ import { FriendshipService } from './services/friendshipService.js';
 import { NotificationService } from './services/notificationService.js';
 import { DirectoryService } from './services/directoryService.js';
 import { AdminService } from './services/adminService.js';
+import { QuizEngine } from './services/quizEngine.js';
 
 export interface ContainerServices {
   sessions: SessionService;
@@ -29,6 +33,7 @@ export interface ContainerServices {
   friendships: FriendshipService;
   directory: DirectoryService;
   admin: AdminService;
+  quizzes: QuizEngine;
 }
 
 export interface Container {
@@ -42,6 +47,9 @@ export interface Container {
     emailChanges: EmailChangesRepository;
     friendships: FriendshipsRepository;
     notifications: NotificationsRepository;
+    tests: TestsRepository;
+    questions: QuestionsRepository;
+    attempts: AttemptsRepository;
   };
   services: ContainerServices;
   /** Test-only convenience shortcuts (set by createTestContainer). */
@@ -77,6 +85,9 @@ interface ContainerOverrides {
   emailChangesRepo?: EmailChangesRepository;
   friendshipsRepo?: FriendshipsRepository;
   notificationsRepo?: NotificationsRepository;
+  testsRepo?: TestsRepository;
+  questionsRepo?: QuestionsRepository;
+  attemptsRepo?: AttemptsRepository;
   mailer?: MailService | MailLike;
   avatarStorage?: AvatarStorage | AvatarStubLike;
   crypto?: {
@@ -110,6 +121,9 @@ export function buildContainer({
   const emailChangesRepo = overrides.emailChangesRepo || new EmailChangesRepository(db);
   const friendshipsRepo = overrides.friendshipsRepo || new FriendshipsRepository(db);
   const notificationsRepo = overrides.notificationsRepo || new NotificationsRepository(db);
+  const testsRepo = overrides.testsRepo || new TestsRepository(db);
+  const questionsRepo = overrides.questionsRepo || new QuestionsRepository(db);
+  const attemptsRepo = overrides.attemptsRepo || new AttemptsRepository(db);
 
   const sessions = new SessionService({
     sessionsRepo,
@@ -158,6 +172,7 @@ export function buildContainer({
     sessionsRepo,
     clock,
   });
+  const quizzes = new QuizEngine({ testsRepo, questionsRepo, attemptsRepo, clock });
 
   return {
     db,
@@ -170,6 +185,9 @@ export function buildContainer({
       emailChanges: emailChangesRepo,
       friendships: friendshipsRepo,
       notifications: notificationsRepo,
+      tests: testsRepo,
+      questions: questionsRepo,
+      attempts: attemptsRepo,
     },
     services: {
       sessions,
@@ -182,6 +200,7 @@ export function buildContainer({
       friendships,
       directory,
       admin,
+      quizzes,
     },
     close() {
       closeDatabase(db);
