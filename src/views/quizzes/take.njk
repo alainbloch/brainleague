@@ -1,154 +1,54 @@
 {% extends "layouts/base.njk" %}
 
 {% block content %}
-<div class="grid gap-6">
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="font-heading text-xl font-semibold text-ink">Test in progress</h1>
-      <p class="text-xs text-muted">Question <span id="progress-current">1</span> of <span id="progress-total">{{ questions.length }}</span></p>
+<div class="quiz-shell grid gap-6">
+  <header class="grid gap-3">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <h1 class="font-heading text-xl font-semibold text-ink">Your brain workout</h1>
+        <p id="quiz-progress-label" class="text-sm text-muted" aria-live="polite">Question <span id="progress-current">1</span> of {{ questions.length }}</p>
+      </div>
+      <div class="quiz-clock text-right">
+        <span id="timer-label" class="block text-xs text-muted">Time remaining</span>
+        <span id="timer" class="text-xl font-semibold text-ink tabular-nums" role="timer">--:--</span>
+      </div>
     </div>
-    <div class="flex items-center gap-3">
-      <span class="{{ ui.badgeClass('danger') }}" id="timer-label">Time</span>
-      <span class="font-semibold text-ink tabular-nums" id="timer">--:--</span>
-    </div>
-  </div>
+    <progress id="quiz-progress" max="{{ questions.length }}" value="0" aria-label="Questions completed"></progress>
+    <p class="text-sm text-muted">Select an answer, then choose Next. Use keys <strong>1–4</strong> to select and <strong>Enter</strong> to continue. You cannot go back.</p>
+  </header>
 
   <section class="{{ ui.cardClass }}">
     <div id="quiz" class="grid gap-6">
       {% for q in questions %}
-        <div class="question-view hidden grid gap-5" data-question-id="{{ q.id }}" data-index="{{ loop.index0 }}">
-          <div>
-            <p class="text-xs text-muted mb-1">Q{{ loop.index }} · {{ q.categorySlug | replace('-', ' ') }}</p>
-            <h2 class="font-heading text-lg font-medium text-ink leading-snug">{{ q.prompt }}</h2>
-            <p class="mt-1 text-xs text-muted">Typical solve time: ~{{ q.estSeconds }}s</p>
-          </div>
-          <div class="grid gap-2">
+        <section class="question-view" hidden data-question-id="{{ q.id }}" aria-labelledby="question-{{ loop.index0 }}">
+          <p class="text-xs text-muted mb-2">{{ q.categorySlug | replace('-', ' ') }} · Typical solve time ~{{ q.estSeconds }}s</p>
+          <h2 id="question-{{ loop.index0 }}" tabindex="-1" class="font-heading text-xl font-medium text-ink leading-snug">{{ q.visual.prompt if q.visual else q.prompt }}</h2>
+          {% if q.visual %}
+            <figure class="reasoning-diagram" role="img" aria-label="{{ q.visual.description }}">{{ q.visual.svg | safe }}</figure>
+            <details class="text-sm text-muted mb-4"><summary>Text description</summary><p>{{ q.visual.description }}</p></details>
+          {% endif %}
+          <div class="answer-grid" role="group" aria-labelledby="question-{{ loop.index0 }}">
             {% for choice in q.choices %}
-              <button type="button" class="choice text-left {{ ui.buttonClass('secondary', 'md') }}" data-index="{{ loop.index0 }}">{{ choice }}</button>
+              <button type="button" class="answer-card choice" aria-pressed="false" aria-keyshortcuts="{{ loop.index }}" data-index="{{ loop.index0 }}">
+                <span class="answer-key" aria-hidden="true">{{ loop.index }}</span>
+                <span class="answer-content">
+                  {% if q.visual and q.visual.choices[loop.index0] %}<span class="answer-diagram">{{ q.visual.choices[loop.index0] | safe }}</span>{% endif %}
+                  <span>{{ choice }}</span>
+                </span>
+                <span class="answer-check" aria-hidden="true">✓</span>
+              </button>
             {% endfor %}
           </div>
-          <div class="flex justify-between">
-            <button type="button" id="skip-btn" class="{{ ui.buttonClass('tertiary', 'md') }}">Skip — I can't answer this</button>
-          </div>
-        </div>
+        </section>
       {% endfor %}
+      <div class="quiz-actions">
+        <button type="button" id="skip-btn" class="{{ ui.buttonClass('tertiary', 'md') }}">Skip question</button>
+        <button type="button" id="next-btn" disabled class="{{ ui.buttonClass('primary', 'lg') }}">Next question →</button>
+      </div>
+      <p id="quiz-status" role="status" class="text-sm text-muted">Choose one answer to continue.</p>
     </div>
+    <noscript>This timed test requires JavaScript. Enable it before starting a test.</noscript>
   </section>
 </div>
-
-<script>
-(function () {
-  // Server-authoritative deadline (ms since epoch). Anchoring the countdown on
-  // this server value keeps a skewed client clock from adding time.
-  var deadlineMs = {{ deadlineMs }};
-  var attemptId = "{{ attemptId }}";
-  var views = Array.prototype.slice.call(document.querySelectorAll('.question-view'));
-  var progressCurrent = document.getElementById('progress-current');
-  var progressTotal = document.getElementById('progress-total');
-  var timerEl = document.getElementById('timer');
-  var timerLabel = document.getElementById('timer-label');
-  var skipBtn = document.getElementById('skip-btn');
-  var answered = []; // [{ questionId, chosenIndex, timeMs }]
-  var idx = 0;
-  var questionStart = Date.now();
-
-  function fmt(ms) {
-    if (ms <= 0) return '0:00';
-    var totalSec = Math.ceil(ms / 1000);
-    var m = Math.floor(totalSec / 60);
-    var s = totalSec % 60;
-    return m + ':' + (s < 10 ? '0' : '') + s;
-  }
-
-  function render() {
-    views.forEach(function (v) { v.classList.add('hidden'); });
-    if (idx >= views.length) { submit(); return; }
-    var v = views[idx];
-    v.classList.remove('hidden');
-    questionStart = Date.now();
-    progressCurrent.textContent = String(idx + 1);
-    progressTotal.textContent = String(views.length);
-  }
-
-  function advance(answer) {
-    answered.push(answer);
-    idx += 1;
-    render();
-    saveProgress();
-  }
-
-  // Persist answers to the server so an abandoned test can still be graded when
-  // its deadline passes. Debounced gently; fire-and-forget, never blocks the UI.
-  var saveTimer = null;
-  function saveProgress() {
-    var payload = JSON.stringify(answered);
-    if (saveTimer) return; // coalesce bursts
-    saveTimer = setTimeout(function () { saveTimer = null; }, 400);
-    var fd = new FormData();
-    fd.append('answers', payload);
-    fetch('/tests/' + attemptId + '/progress', { method: 'POST', body: fd, credentials: 'same-origin' })
-      .catch(function () { /* best-effort: submission is the authoritative path */ });
-  }
-
-  // No going back: choosing a choice records the answer and moves on.
-  views.forEach(function (v) {
-    var questionId = v.getAttribute('data-question-id');
-    var choices = v.querySelectorAll('.choice');
-    choices.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var chosenIndex = Number(btn.getAttribute('data-index'));
-        advance({
-          questionId: questionId,
-          chosenIndex: chosenIndex,
-          timeMs: Date.now() - questionStart
-        });
-      });
-    });
-  });
-
-  skipBtn.addEventListener('click', function () {
-    var v = views[idx];
-    advance({
-      questionId: v.getAttribute('data-question-id'),
-      chosenIndex: null,
-      timeMs: Date.now() - questionStart
-    });
-  });
-
-  function submit() {
-    // Stop the countdown so only one submit happens.
-    clearInterval(timerHandle);
-    var form = document.createElement('form');
-    form.method = 'post';
-    form.action = '/tests/' + attemptId + '/submit';
-    var input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'answers';
-    input.value = JSON.stringify(answered);
-    form.appendChild(input);
-    document.body.appendChild(form);
-    form.submit();
-  }
-
-  var timerHandle = setInterval(function () {
-    var remaining = deadlineMs - Date.now();
-    timerEl.textContent = fmt(remaining);
-    if (remaining < 20000) timerLabel.textContent = 'Hurry!';
-    if (remaining <= 0) {
-      // Time's up: flush the un-answered current question then submit.
-      var v = views[idx];
-      if (v) {
-        answered.push({
-          questionId: v.getAttribute('data-question-id'),
-          chosenIndex: null,
-          timeMs: Date.now() - questionStart
-        });
-      }
-      submit();
-    }
-  }, 250);
-
-  render();
-})();
-</script>
+{% include "quizzes/runner.njk" %}
 {% endblock %}
