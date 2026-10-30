@@ -9,6 +9,7 @@ import type { AvatarStorage } from './avatarStorage.js';
 
 interface AppConfigLike {
   appUrl: string;
+  mail?: { transport: string };
 }
 
 /** Any object that can deliver a magic link (real SMTP-aware service or spy). */
@@ -133,7 +134,7 @@ export class IdentityService {
   async register(
     { name, email, password }: { name: string; email: string; password: string },
     { ip }: AuthContext,
-  ): Promise<{ ok: true; isNew: boolean }> {
+  ): Promise<{ ok: true; isNew: boolean; verificationRequired: boolean }> {
     const normalizedEmail = this.#email(email);
     await this.#checkRateLimit('register', { ip, email: normalizedEmail });
 
@@ -154,12 +155,16 @@ export class IdentityService {
     // guarantee a value (existing row, or the row just created).
     const account = user!;
 
-    // Only send verification when needed: new accounts always; existing unverified
-    // accounts get a fresh link; verified accounts are left untouched (silent no-op).
-    if (isNew || !account.emailVerifiedAt) {
-      await this.#sendMagicLink(account, 'verify');
+    const verificationRequired = this.config.mail?.transport !== 'console';
+    if (!account.emailVerifiedAt) {
+      if (verificationRequired) {
+        await this.#sendMagicLink(account, 'verify');
+      } else if (isNew) {
+        this.users.verifyEmail(account.id, this.clock());
+      }
+      // Existing accounts are verified only after password authentication at login.
     }
-    return { ok: true, isNew };
+    return { ok: true, isNew, verificationRequired };
   }
 
   /**
@@ -240,7 +245,13 @@ export class IdentityService {
     const match = this.crypto.passwordMatches(password || '', user?.passwordHash);
     if (!user || !match) return { ok: false, reason: 'Email or password is incorrect.' };
     if (!user.emailVerifiedAt) {
-      return { ok: false, reason: 'Verify your email before signing in.' };
+      if (this.config.mail?.transport !== 'console') {
+        return { ok: false, reason: 'Verify your email before signing in.' };
+      }
+      // Console mail cannot reach an inbox. Authenticate first, then unblock
+      // accounts registered before console-mode automatic verification existed.
+      this.users.verifyEmail(user.id, this.clock());
+      this.tokens.revokeAllForUser(user.id);
     }
     return { ok: true, userId: user.id };
   }

@@ -50,15 +50,16 @@ export class AuthController {
     const body = (request.body || {}) as { name?: string; email?: string; password?: string };
     const { name, email, password } = body;
     try {
-      await this.identity.register(
+      const result = await this.identity.register(
         { name: name || '', email: email || '', password: password || '' },
         { ip: this.#ip(request) },
       );
       return reply.view('auth/sent', {
-        pageTitle: 'Check your email',
-        message:
-          'If this address is available, a verification email has been sent. ' +
-          'Open the link in your email to confirm your account.',
+        pageTitle: result.verificationRequired ? 'Check your email' : 'Ready to sign in',
+        message: !result.verificationRequired
+          ? 'Email confirmation is not required. Sign in with your email and password.'
+          : 'If this address is available, a verification email has been sent. ' +
+            'Open the link in your email to confirm your account.',
       });
     } catch (error) {
       reply.code(400);
