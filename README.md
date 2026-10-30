@@ -311,6 +311,13 @@ If an asset is missing from the repo, request it by specification (purpose,
 dimensions, format, style reference) — never fabricate or substitute
 unlicensed artwork.
 
+The homepage reuses `BrainLeague-emblem.svg` in its hero. Decorative timer,
+question, podium, and test-card vectors live in
+`src/views/components/home-graphics.njk`; layout and the emblem-matched
+`--brand-*` palette live in `src/public/assets/css/app.css`. These graphics are
+hidden from assistive technology because the adjacent headings convey their
+meaning. Rebuild CSS after changing the homepage styles or template classes.
+
 ## Architecture summary
 
 ```
