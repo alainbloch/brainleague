@@ -283,9 +283,9 @@
   }
 }
 
-/* Larger, tactile homepage actions; other screens keep their compact controls. */
+/* Shared prominent actions for the homepage and authentication forms. */
 .home-cta,
-.home-page header a[href='/register'] > button {
+.auth-cta {
   min-height: 56px;
   padding: 0.9rem 1.5rem;
   border-radius: 16px;
@@ -305,7 +305,7 @@
 
 @media (hover: hover) {
   .home-cta:hover,
-  .home-page header a[href='/register']:hover > button {
+  .auth-cta:hover {
     transform: translateY(-2px);
     box-shadow:
       0 7px 0 color-mix(in srgb, var(--brand-navy) 18%, transparent),
@@ -314,7 +314,7 @@
 }
 
 .home-cta:active,
-.home-page header a[href='/register']:active > button {
+.auth-cta:active {
   transform: translateY(3px);
   box-shadow: 0 2px 0 color-mix(in srgb, var(--brand-navy) 18%, transparent);
 }
@@ -323,21 +323,60 @@
   .home-hero-copy .home-cta {
     width: 100%;
   }
-  .home-page header a[href='/register'] > button {
-    min-height: 48px;
-    padding: 0.65rem 0.85rem;
-    font-size: 0.875rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .home-cta,
   .home-cta:hover,
   .home-cta:active,
-  .home-page header a[href='/register'] > button,
-  .home-page header a[href='/register']:hover > button,
-  .home-page header a[href='/register']:active > button {
+  .auth-cta,
+  .auth-cta:hover,
+  .auth-cta:active {
     transition: none;
     transform: none;
   }
+}
+
+/* One compact navigation action on every page, independent of page content. */
+.nav-create-account {
+  min-height: 40px;
+  padding: 0.5rem 0.875rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--brand-navy) 15%, transparent);
+}
+
+.auth-card {
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  border: 1px solid var(--edge);
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--brand-navy) 8%, transparent);
+}
+.auth-intro {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.auth-emblem {
+  width: 64px;
+  height: auto;
+  margin: 0 auto 1rem;
+}
+.auth-heading {
+  font-size: clamp(1.75rem, 5vw, 2rem);
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+.auth-description {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.auth-card input {
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 1rem;
 }

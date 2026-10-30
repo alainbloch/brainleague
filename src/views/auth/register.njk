@@ -3,8 +3,12 @@
 
 {% block content %}
 <div class="mx-auto max-w-md">
-  <section class="{{ ui.cardClass }}">
-    <h2 class="font-heading text-base font-semibold mb-4">Create account</h2>
+  <section class="auth-card">
+    <div class="auth-intro">
+      <img src="/assets/images/BrainLeague-emblem.svg" alt="" width="675" height="810" class="auth-emblem" />
+      <h1 class="auth-heading">Join the brain crew</h1>
+      <p class="auth-description">A little curiosity goes a long way. Create your account and find your first challenge.</p>
+    </div>
     {% if error %}
       <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
     {% endif %}
@@ -12,7 +16,7 @@
       {{ forms.field("name", "Name", { value: values.name, autocomplete: "name", required: true }) }}
       {{ forms.field("email", "Email", { type: "email", value: values.email, autocomplete: "email", required: true }) }}
       {{ forms.field("password", "Password", { type: "password", hint: "8–128 characters.", autocomplete: "new-password", required: true }) }}
-      <button type="submit" class="mt-2 w-full {{ ui.buttonClass('primary', 'md') }}">Create account</button>
+      <button type="submit" class="auth-cta mt-2 w-full {{ ui.buttonClass('primary', 'md') }}">Create account</button>
     </form>
     <p class="mt-6 text-center text-sm text-muted">Already have an account? <a href="/login" class="text-ink hover:text-ink underline-offset-4 hover:underline">Sign in</a></p>
   </section>
