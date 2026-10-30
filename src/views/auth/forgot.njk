@@ -1,0 +1,18 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="mx-auto max-w-md">
+  <section class="{{ ui.cardClass }}">
+    <h2 class="font-heading text-base font-semibold mb-4">Forgot your password?</h2>
+    {% if error %}
+      <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
+    {% endif %}
+    <form method="post" action="/auth/forgot" class="grid gap-4">
+      {{ forms.field("email", "Email", { type: "email", value: values.email, autocomplete: "email", required: true }) }}
+      <button type="submit" class="mt-2 w-full {{ ui.buttonClass('primary', 'md') }}">Send reset link</button>
+    </form>
+    <p class="mt-6 text-center text-sm text-muted"><a href="/login" class="text-ink underline-offset-4 hover:underline">Back to sign in</a></p>
+  </section>
+</div>
+{% endblock %}

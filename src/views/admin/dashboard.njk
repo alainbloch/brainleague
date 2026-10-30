@@ -1,0 +1,31 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+<div class="grid gap-6">
+  <header class="grid gap-1">
+    <h1 class="font-heading text-2xl font-semibold text-ink">Admin</h1>
+    <p class="text-sm text-muted">Manage the accounts on this instance.</p>
+  </header>
+
+  <div class="grid gap-3 sm:grid-cols-3">
+    <section class="{{ ui.cardClass }}">
+      <p class="text-xs text-muted">Total users</p>
+      <p class="font-heading text-2xl font-semibold text-ink">{{ stats.users }}</p>
+    </section>
+    <section class="{{ ui.cardClass }}">
+      <p class="text-xs text-muted">Administrators</p>
+      <p class="font-heading text-2xl font-semibold text-ink">{{ stats.admins }}</p>
+    </section>
+    <section class="{{ ui.cardClass }}">
+      <p class="text-xs text-muted">Pending friend requests</p>
+      <p class="font-heading text-2xl font-semibold text-ink">{{ user.adminPending or 0 }}</p>
+    </section>
+  </div>
+
+  <div class="flex flex-wrap gap-3">
+    <a href="/admin/users"><button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Manage users</button></a>
+    <a href="/admin/broadcast"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Broadcast notification</button></a>
+    <a href="/users"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Browse directory</button></a>
+  </div>
+</div>
+{% endblock %}

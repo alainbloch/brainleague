@@ -1,0 +1,78 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="grid gap-6">
+  {% if error %}
+    <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
+  {% endif %}
+
+  <section class="{{ ui.cardClass }}">
+    <div class="flex flex-wrap items-center gap-4">
+      {% if profile.user.avatarPath %}
+        <img src="/uploads/{{ profile.user.avatarPath }}" alt="{{ profile.user.name }}"
+          class="size-16 rounded-pill object-cover border border-edge" />
+      {% else %}
+        <span class="inline-flex size-16 items-center justify-center rounded-pill bg-raised text-ink-soft font-semibold">{{ ui.initials(profile.user.name) }}</span>
+      {% endif %}
+      <div class="min-w-0 grid gap-1">
+        <h1 class="font-heading text-2xl font-semibold text-ink">{{ profile.user.name }}</h1>
+        <p class="text-sm text-muted">
+          Member since {{ ui.date(profile.user.createdAt) }}
+          {% if profile.user.role === 'admin' %}<span class="ml-2 {{ ui.badgeClass('accent') }}">Admin</span>{% endif %}
+        </p>
+      </div>
+
+      {% if profile.relationship !== 'self' %}
+        <div class="ml-auto flex items-center gap-2">
+          {% if profile.relationship === 'friends' %}
+            <span class="{{ ui.badgeClass('ok') }}">Friends</span>
+            <form method="post" action="/users/{{ profile.user.id }}/unfriend">
+              <button type="submit" class="{{ ui.buttonClass('danger', 'sm') }}">Unfriend</button>
+            </form>
+          {% elif profile.relationship === 'incoming' %}
+            <span class="{{ ui.badgeClass('warn') }}">Requested to be friends</span>
+            <form method="post" action="/users/{{ profile.user.id }}/accept">
+              <button type="submit" class="{{ ui.buttonClass('primary', 'sm') }}">Accept</button>
+            </form>
+            <form method="post" action="/users/{{ profile.user.id }}/unfriend">
+              <button type="submit" class="{{ ui.buttonClass('secondary', 'sm') }}">Decline</button>
+            </form>
+          {% elif profile.relationship === 'outgoing' %}
+            <span class="{{ ui.badgeClass('neutral') }}">Request sent</span>
+            <form method="post" action="/users/{{ profile.user.id }}/unfriend">
+              <button type="submit" class="{{ ui.buttonClass('secondary', 'sm') }}">Cancel request</button>
+            </form>
+          {% else %}
+            <form method="post" action="/users/{{ profile.user.id }}/friend">
+              <button type="submit" class="{{ ui.buttonClass('primary', 'sm') }}">Add friend</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="{{ ui.cardClass }}">
+    <h2 class="font-heading text-base font-semibold mb-4">Friends ({{ profile.friends.length }})</h2>
+    {% if profile.friends.length === 0 %}
+      <p class="text-sm text-muted">No friends yet.</p>
+    {% else %}
+      <ul class="grid gap-2 sm:grid-cols-2">
+        {% for friend in profile.friends %}
+          <li>
+            <a href="/users/{{ friend.id }}" class="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-ink-soft hover:bg-fill hover:text-ink">
+              {% if friend.avatarPath %}
+                <img src="/uploads/{{ friend.avatarPath }}" alt="" class="size-7 rounded-pill object-cover" />
+              {% else %}
+                <span class="inline-flex size-7 items-center justify-center rounded-pill bg-raised text-xs font-semibold">{{ ui.initials(friend.name) }}</span>
+              {% endif %}
+              {{ friend.name }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

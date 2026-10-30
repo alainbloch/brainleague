@@ -1,0 +1,22 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="grid gap-6">
+  <section class="{{ ui.cardClass }}">
+    <h1 class="font-heading text-2xl font-semibold text-ink">Hello{% if user %}, {{ user.name }}{% endif %}.</h1>
+    <p class="mt-2 text-sm text-muted">
+      Welcome to Brain League.
+    </p>
+    <div class="mt-6 flex flex-wrap gap-3">
+      {% if user %}
+        <a href="/account"><button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Go to account</button></a>
+        <a href="/logout"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Sign out</button></a>
+      {% else %}
+        <a href="/register"><button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Create account</button></a>
+        <a href="/login"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Sign in</button></a>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

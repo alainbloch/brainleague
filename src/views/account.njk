@@ -1,0 +1,26 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="grid gap-6">
+  <section class="{{ ui.cardClass }}">
+    <div class="flex flex-wrap items-center gap-4">
+      {% if user.avatarPath %}
+        <img src="/uploads/{{ user.avatarPath }}" alt="{{ user.name }}"
+          class="size-14 rounded-pill object-cover border border-edge" />
+      {% else %}
+        <span class="inline-flex size-14 items-center justify-center rounded-pill bg-raised text-ink-soft font-semibold">{{ user.name | first | upper }}</span>
+      {% endif %}
+      <div class="min-w-0 grid gap-1">
+        <h1 class="font-heading text-2xl font-semibold text-ink">{{ user.name }}</h1>
+        <p class="text-sm text-muted">{{ user.email }}</p>
+      </div>
+      <div class="ml-auto flex items-center gap-3 text-sm">
+        <span class="{{ ui.badgeClass('ok') }}">Verified</span>
+        <a href="/settings"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Settings</button></a>
+        <a href="/logout"><button type="button" class="{{ ui.buttonClass('tertiary', 'md') }}">Sign out</button></a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="mx-auto max-w-md">
+  <section class="{{ ui.cardClass }}">
+    <h2 class="font-heading text-base font-semibold mb-4">Verification failed</h2>
+    <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
+    <p class="text-sm text-muted">Request a new verification link from the sign-in page.</p>
+  </section>
+</div>
+{% endblock %}

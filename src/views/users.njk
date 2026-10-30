@@ -1,0 +1,65 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="grid gap-6">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div class="grid gap-1">
+      <h1 class="font-heading text-2xl font-semibold text-ink">Users</h1>
+      <p class="text-sm text-muted">{{ directory.total }} members</p>
+    </div>
+    <form method="get" action="/users" class="flex items-center gap-2">
+      <input type="search" name="q" value="{{ q }}" placeholder="Search by name or email"
+        class="{{ ui.inputClass }} min-w-56" aria-label="Search users" />
+      <button type="submit" class="{{ ui.buttonClass('secondary', 'md') }}">Search</button>
+    </form>
+  </header>
+
+  {% if error %}
+    <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
+  {% endif %}
+
+  {% if directory.users.length === 0 %}
+    <section class="{{ ui.cardClass }}">
+      <p class="text-sm text-muted">No users found.</p>
+    </section>
+  {% else %}
+    <div class="grid gap-3 sm:grid-cols-2">
+      {% for member in directory.users %}
+        <a href="/users/{{ member.id }}"
+          class="flex items-center gap-4 rounded-lg border border-edge bg-surface p-4 text-ink transition-colors duration-base hover:bg-fill-hover">
+          {% if member.avatarPath %}
+            <img src="/uploads/{{ member.avatarPath }}" alt="{{ member.name }}"
+              class="size-11 rounded-pill object-cover border border-edge" />
+          {% else %}
+            <span class="inline-flex size-11 shrink-0 items-center justify-center rounded-pill bg-raised text-ink-soft font-semibold">{{ ui.initials(member.name) }}</span>
+          {% endif %}
+          <span class="min-w-0 grid gap-0.5">
+            <span class="flex items-center gap-2 text-sm font-medium">
+              {{ member.name }}
+              {% if member.role === 'admin' %}<span class="{{ ui.badgeClass('accent') }}">Admin</span>{% endif %}
+            </span>
+            <span class="truncate text-xs text-muted">{{ member.email }}</span>
+          </span>
+        </a>
+      {% endfor %}
+    </div>
+
+    {% if directory.pages > 1 %}
+      <nav class="flex items-center justify-between text-sm" aria-label="Pagination">
+        <div class="text-muted">
+          Page {{ directory.page }} of {{ directory.pages }}
+        </div>
+        <div class="flex items-center gap-2">
+          {% if directory.page > 1 %}
+            <a href="/users?q={{ q }}&page={{ directory.page - 1 }}"><button type="button" class="{{ ui.buttonClass('secondary', 'sm') }}">Previous</button></a>
+          {% endif %}
+          {% if directory.page < directory.pages %}
+            <a href="/users?q={{ q }}&page={{ directory.page + 1 }}"><button type="button" class="{{ ui.buttonClass('secondary', 'sm') }}">Next</button></a>
+          {% endif %}
+        </div>
+      </nav>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

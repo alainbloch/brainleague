@@ -1,0 +1,2 @@
+# Keeps the data/ directory present in git so fresh checkouts have a place for
+# the SQLite database and avatar uploads (all ignored; created at runtime).

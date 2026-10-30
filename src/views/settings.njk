@@ -1,0 +1,80 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="grid gap-6">
+  <header class="flex flex-wrap items-start justify-between gap-4">
+    <div class="grid gap-1">
+      <h1 class="font-heading text-2xl font-semibold text-ink">Account settings</h1>
+      <p class="text-sm text-muted">Manage your profile, email, and password.</p>
+    </div>
+  </header>
+
+  {% if notice %}
+    <div class="mb-4">{{ forms.alert(notice.message, "ok") }}</div>
+  {% endif %}
+  {% if error %}
+    <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
+  {% endif %}
+
+  {# ---- Profile: name + avatar ---- #}
+  <section class="{{ ui.cardClass }}">
+    <h2 class="font-heading text-base font-semibold mb-4">Profile</h2>
+
+    <form method="post" action="/settings/profile" class="grid gap-4">
+      {{ forms.field("name", "Name", { value: values.name, autocomplete: "name", required: true }) }}
+      <div class="flex items-center justify-start">
+        <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Save name</button>
+      </div>
+    </form>
+
+    <hr class="my-6 border-edge" />
+
+    <form method="post" action="/settings/avatar" enctype="multipart/form-data" class="grid gap-4">
+      <div class="flex items-center gap-4">
+        {% if user.avatarPath %}
+          <img src="/uploads/{{ user.avatarPath }}" alt="{{ user.name }}" class="size-14 rounded-pill object-cover border border-edge" />
+        {% else %}
+          <span class="inline-flex size-14 items-center justify-center rounded-pill bg-raised text-ink-soft font-semibold">{{ user.name | first | upper }}</span>
+        {% endif %}
+        <div class="grid gap-1">
+          <p class="text-sm text-muted">Profile photo (JPEG, PNG, WebP, or GIF; max 5 MB).</p>
+          <input type="file" id="avatar" name="avatar" accept="image/jpeg,image/png,image/webp,image/gif"
+            class="block w-full text-sm text-muted file:mr-3 file:rounded-md file:border file:border-edge file:bg-fill file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink-soft hover:file:bg-fill-hover" />
+        </div>
+      </div>
+      <div>
+        <button type="submit" class="{{ ui.buttonClass('secondary', 'md') }}">Upload photo</button>
+      </div>
+    </form>
+  </section>
+
+  {# ---- Email ---- #}
+  <section class="{{ ui.cardClass }}">
+    <h2 class="font-heading text-base font-semibold mb-4">Email address</h2>
+    <form method="post" action="/settings/email" class="grid gap-4">
+      <p class="text-sm text-muted">Current: <strong class="text-ink">{{ user.email }}</strong></p>
+      {{ forms.field("email", "New email", { type: "email", placeholder: "you@example.com", autocomplete: "email", required: true }) }}
+      {{ forms.field("currentPassword", "Current password", { type: "password", autocomplete: "current-password", required: true }) }}
+      <p class="text-xs text-muted">A confirmation link is emailed to the new address before it takes effect.</p>
+      <div>
+        <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Change email</button>
+      </div>
+    </form>
+  </section>
+
+  {# ---- Password ---- #}
+  <section class="{{ ui.cardClass }}">
+    <h2 class="font-heading text-base font-semibold mb-4">Password</h2>
+    <form method="post" action="/settings/password" class="grid gap-4">
+      {{ forms.field("currentPassword", "Current password", { type: "password", autocomplete: "current-password", required: true }) }}
+      {{ forms.field("newPassword", "New password", { type: "password", hint: "8–128 characters.", autocomplete: "new-password", required: true }) }}
+      {{ forms.field("passwordConfirm", "Repeat new password", { type: "password", autocomplete: "new-password", required: true }) }}
+      <p class="text-xs text-muted">Changing your password signs out all other sessions.</p>
+      <div>
+        <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Update password</button>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="mx-auto max-w-md">
+  <section class="{{ ui.cardClass }}">
+    <h2 class="font-heading text-base font-semibold mb-4">Email confirmed</h2>
+    <div class="mb-4">{{ forms.alert("Your email address was updated and you are signed in.", "ok") }}</div>
+    {% if user %}
+      <p class="text-sm text-muted mb-6">You are signed in as <strong class="text-ink">{{ user.email }}</strong>.</p>
+    {% endif %}
+    <div class="flex flex-wrap gap-3 text-sm">
+      <a href="/account"><button type="button" class="{{ ui.buttonClass('primary', 'sm') }}">Go to account</button></a>
+      <a href="/settings"><button type="button" class="{{ ui.buttonClass('secondary', 'sm') }}">Settings</button></a>
+    </div>
+  </section>
+</div>
+{% endblock %}

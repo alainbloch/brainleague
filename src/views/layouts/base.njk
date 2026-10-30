@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" data-mode="light" data-accent="blue">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{{ pageTitle }}{% endblock %} · Brain League</title>
+    <link rel="stylesheet" href="/assets/css/app.min.css" />
+  </head>
+  <body class="min-h-screen bg-canvas text-ink font-sans antialiased">
+    <header class="border-b border-edge">
+      <div class="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2 px-4 py-3">
+        <a href="/" class="flex items-center gap-2" aria-label="BrainLeague home">
+          <img src="/assets/images/BrainLeague-emblem.svg" alt="" class="h-7 w-auto" />
+          <img src="/assets/images/BrainLeague-wordmark.svg" alt="BrainLeague" class="h-5 w-auto" />
+        </a>
+        <nav class="flex flex-wrap items-center gap-3 text-sm">
+          {% if user %}
+            <a href="/users" class="text-ink-soft hover:text-ink underline-offset-4 hover:underline">Users</a>
+
+            {# Notification bell: symbol with an unread badge. #}
+            <a href="/notifications" class="relative inline-flex items-center text-ink-soft hover:text-ink" aria-label="Notifications">
+              {{ ui.icon('bell', { size: 18 }) }}
+              {% if unreadNotifications > 0 %}
+                <span class="absolute -right-1.5 -top-1 inline-flex size-4 items-center justify-center rounded-pill bg-accent text-[10px] font-semibold text-on-accent" aria-label="{{ unreadNotifications }} unread">{{ unreadNotifications }}</span>
+              {% endif %}
+            </a>
+
+            {% if user.role === 'admin' %}
+              <a href="/admin" class="text-ink-soft hover:text-ink underline-offset-4 hover:underline">Admin</a>
+            {% endif %}
+
+            {# User dropdown: symbol trigger (details/summary = accessible, no JS). #}
+            <details class="group relative">
+              <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-md px-2 py-1 text-ink-soft hover:bg-fill hover:text-ink [&::-webkit-details-marker]:hidden">
+                {% if user.avatarPath %}
+                  <img src="/uploads/{{ user.avatarPath }}" alt="" class="size-6 rounded-pill object-cover border border-edge" />
+                {% else %}
+                  <span class="inline-flex size-6 items-center justify-center rounded-pill bg-raised text-xs font-semibold">{{ user.name | first | upper }}</span>
+                {% endif %}
+                {{ ui.icon('chevron_down', { size: 14 }) }}
+              </summary>
+              <div class="absolute right-0 z-10 mt-2 min-w-52 rounded-lg border border-edge bg-surface p-1.5 shadow-lg">
+                <div class="border-b border-edge px-3 py-2">
+                  <p class="text-sm font-medium text-ink">{{ user.name }}</p>
+                  <p class="text-xs text-muted">{{ user.email }}</p>
+                </div>
+                <a href="/account" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-ink-soft hover:bg-fill hover:text-ink">{{ ui.icon('user', { size: 14 }) }} Account</a>
+                <a href="/settings" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-ink-soft hover:bg-fill hover:text-ink">{{ ui.icon('gear', { size: 14 }) }} Settings</a>
+                <a href="/logout" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-danger hover:bg-fill-hover">{{ ui.icon('power', { size: 14 }) }} Sign out</a>
+              </div>
+            </details>
+          {% else %}
+            <a href="/login" class="text-ink-soft hover:text-ink underline-offset-4 hover:underline">Sign in</a>
+            <a href="/register">
+              <button type="button" class="{{ ui.buttonClass('primary', 'sm') }}">Create account</button>
+            </a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+    <main class="mx-auto w-full max-w-4xl px-4 py-10">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="grid gap-6">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div class="grid gap-1">
+      <h1 class="font-heading text-2xl font-semibold text-ink">Manage users</h1>
+      <p class="text-sm text-muted">{{ data.total }} accounts · page {{ data.page }} of {{ data.pages }}</p>
+    </div>
+    <form method="get" action="/admin/users" class="flex items-center gap-2">
+      <input type="search" name="q" value="{{ q }}" placeholder="Search by name or email"
+        class="{{ ui.inputClass }} min-w-56" aria-label="Search users" />
+      <button type="submit" class="{{ ui.buttonClass('secondary', 'md') }}">Search</button>
+    </form>
+  </header>
+
+  {% if notice %}
+    <div class="mb-4">{{ forms.alert(notice, "ok") }}</div>
+  {% endif %}
+  {% if error %}
+    <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
+  {% endif %}
+
+  <section class="overflow-x-auto rounded-lg border border-edge bg-surface p-2">
+    <table class="w-full min-w-[44rem] border-collapse text-sm">
+      <thead>
+        <tr class="text-left text-xs uppercase text-muted">
+          <th class="px-3 py-2 font-medium">User</th>
+          <th class="px-3 py-2 font-medium">Email</th>
+          <th class="px-3 py-2 font-medium">Status</th>
+          <th class="px-3 py-2 font-medium">Role</th>
+          <th class="px-3 py-2 font-medium">Joined</th>
+          <th class="px-3 py-2 font-medium text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in data.users %}
+          <tr class="border-t border-edge hover:bg-fill">
+            <td class="px-3 py-2.5">
+              <div class="flex items-center gap-2.5">
+                {% if member.avatarPath %}
+                  <img src="/uploads/{{ member.avatarPath }}" alt="" class="size-7 rounded-pill object-cover" />
+                {% else %}
+                  <span class="inline-flex size-7 items-center justify-center rounded-pill bg-raised text-xs font-semibold">{{ ui.initials(member.name) }}</span>
+                {% endif %}
+                <span class="font-medium text-ink">{{ member.name }}</span>
+                {% if member.id === user.id %}<span class="{{ ui.badgeClass('neutral') }}">You</span>{% endif %}
+              </div>
+            </td>
+            <td class="px-3 py-2.5 text-muted">{{ member.email }}</td>
+            <td class="px-3 py-2.5">
+              {% if member.emailVerifiedAt %}
+                <span class="{{ ui.badgeClass('ok') }}">Verified</span>
+              {% else %}
+                <span class="{{ ui.badgeClass('warn') }}">Unverified</span>
+              {% endif %}
+            </td>
+            <td class="px-3 py-2.5">
+              {% if member.role === 'admin' %}
+                <span class="{{ ui.badgeClass('accent') }}">Admin</span>
+              {% else %}
+                <span class="{{ ui.badgeClass('neutral') }}">User</span>
+              {% endif %}
+            </td>
+            <td class="px-3 py-2.5 text-muted">{{ ui.date(member.createdAt) }}</td>
+            <td class="px-3 py-2.5">
+              <div class="flex items-center justify-end gap-2">
+                {% if member.id !== user.id %}
+                  <a href="/admin/users/{{ member.id }}/edit"><button type="button" class="{{ ui.buttonClass('secondary', 'sm') }}">Edit</button></a>
+                  <form method="post" action="/admin/users/{{ member.id }}/role">
+                    {% if member.role === 'admin' %}
+                      <input type="hidden" name="role" value="user" />
+                      <button type="submit" class="{{ ui.buttonClass('secondary', 'sm') }}">Demote</button>
+                    {% else %}
+                      <input type="hidden" name="role" value="admin" />
+                      <button type="submit" class="{{ ui.buttonClass('primary', 'sm') }}">Promote</button>
+                    {% endif %}
+                  </form>
+                  <form method="post" action="/admin/users/{{ member.id }}/delete"
+                    onsubmit="return confirm('Delete {{ member.name | e }} and all their data? This cannot be undone.');">
+                    <button type="submit" class="{{ ui.buttonClass('danger', 'sm') }}">Delete</button>
+                  </form>
+                {% else %}
+                  <span class="text-xs text-muted">—</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="6" class="px-3 py-8 text-center text-muted">No accounts match this search.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  {% if data.pages > 1 %}
+    <nav class="flex items-center justify-between text-sm" aria-label="Pagination">
+      <div class="text-muted">Page {{ data.page }} of {{ data.pages }}</div>
+      <div class="flex items-center gap-2">
+        {% if data.page > 1 %}
+          <a href="/admin/users?q={{ q }}&page={{ data.page - 1 }}"><button type="button" class="{{ ui.buttonClass('secondary', 'sm') }}">Previous</button></a>
+        {% endif %}
+        {% if data.page < data.pages %}
+          <a href="/admin/users?q={{ q }}&page={{ data.page + 1 }}"><button type="button" class="{{ ui.buttonClass('secondary', 'sm') }}">Next</button></a>
+        {% endif %}
+      </div>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

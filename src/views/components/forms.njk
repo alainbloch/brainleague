@@ -1,0 +1,33 @@
+{#
+  Reusable form-field component, mirroring rubyminer-core's shared/ui/_field.html.erb.
+  Renders a label, the input, and an optional hint/error message.
+  Usage:
+    {% import "components/forms.njk" as forms %}
+    {{ forms.field(name, label, { type: "email", value: values.email, error: error }) }}
+#}
+{% macro field(name, label, options) %}
+  {% set opts = options or {} %}
+  {% set type = opts.type or "text" %}
+  {% set describe = [ opts.hint, opts.error ] | select | join(" ") %}
+  <div class="grid gap-1.5">
+    <label for="{{ name }}" class="{{ ui.labelClass }}">{{ label }}</label>
+    {% if opts.as == "textarea" %}
+      <textarea id="{{ name }}" name="{{ name }}" rows="{{ opts.rows or 3 }}"
+        class="{{ ui.inputClass }}" {% if opts.placeholder %}placeholder="{{ opts.placeholder }}"{% endif %}
+        {% if opts.required %}required{% endif %} aria-describedby="{{ name }}-help">{{ opts.value or "" }}</textarea>
+    {% else %}
+      <input id="{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ opts.value or "" }}"
+        class="{{ ui.inputClass }}" {% if opts.placeholder %}placeholder="{{ opts.placeholder }}"{% endif %}
+        {% if opts.autocomplete %}autocomplete="{{ opts.autocomplete }}"{% endif %}
+        {% if opts.required %}required{% endif %} aria-describedby="{{ name }}-help" />
+    {% endif %}
+    {% if describe %}
+      <p id="{{ name }}-help" class="text-xs {% if opts.error %}text-danger{% else %}text-muted{% endif %}">{{ describe }}</p>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{# Alert component mirroring shared/ui/_alert.html.erb. #}
+{% macro alert(message, tone) %}
+  <div role="status" class="{{ ui.alertClass(tone or "danger") }}">{{ message }}</div>
+{% endmacro %}
