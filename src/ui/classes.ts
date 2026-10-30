@@ -1,4 +1,3 @@
-import { categoryResults } from './categoryResults.js';
 import { tutorialSections } from './tutorialSections.js';
 
 /**
@@ -87,7 +86,6 @@ export const labelClass = 'text-sm font-medium text-ink-soft';
 /** All helpers exposed to templates via `ui`. */
 export const uiHelpers = {
   tutorialSections,
-  categoryResults,
   buttonClass,
   inputClass,
   badgeClass,

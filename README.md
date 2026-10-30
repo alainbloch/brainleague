@@ -374,7 +374,7 @@ The shipped catalog includes:
 There are 60 new original questions across the focused workouts; the mixed test
 also uses 34 of those questions alongside its 16 original questions. These are
 practice exercises, not official assessment items or validated IQ measurements.
-Figure exercises describe transformations in words. Twelve tutorials cover the
+Figure exercises render shapes and pattern grids with accessible text descriptions. Twelve tutorials cover the
 nine question categories plus rates, percentage changes, and pacing, with worked
 solutions, common mistakes, and self-check answers. Result reviews show each
 question's explanation and link to category tutorials.
@@ -401,3 +401,38 @@ Tutorials remain plain text: `src/ui/tutorialSections.ts` recognizes standalone
 WORKED EXAMPLE, QUICK TIP, COMMON TRAP, TRY IT, and CHECK YOUR ANSWER headings.
 The template escapes every section and uses native details for answer reveals.
 Unrecognized text is preserved, never interpreted as HTML.
+
+### Quiz presentation and coaching
+
+The take screen uses large answer cards. Click a card or press **1–4** to select;
+press **Enter** or **Next** to commit. Selection alone does not submit an answer.
+Skip works on every question; the last confirmation finishes the test. The
+progress bar counts committed questions, including skips. The countdown uses
+elapsed monotonic browser time against the remaining server budget. Expiry
+submits once and leaves an unconfirmed selection unanswered.
+
+`src/ui/reasoningVisuals.ts` renders the six shipped figure questions as trusted,
+responsive SVG geometry, including a pattern grid. Both question and answer
+choices have text equivalents; no image downloads are needed. Exact prompt and
+choice matching keeps admin-edited questions on their original text presentation.
+The same diagrams appear in result reviews. This release needs no content seed
+or schema migration if the previous question pack is already installed.
+
+`src/services/quizCoaching.ts` groups recorded answers by category and recommends
+an available focused workout plus the relevant tutorials. Category accuracy is
+credited correct / selected answers; skips are separate and unavailable timings
+remain unavailable. Browser-recorded times are guidance, not independently
+verified performance measurements. Unvisited questions are not attributed to
+categories. Final submission replaces partial autosaves with the graded payload
+so per-question feedback and the category totals agree with the final score.
+
+Run the interaction and responsive-layout checks with:
+
+```sh
+npx playwright install chromium
+npm run test:browser
+```
+
+The browser checks cover selection, keyboard confirmation, repeated keys, skips,
+autosave, timeout, one-time submission, and 320px/390px/desktop layouts. An existing
+Chromium installation can be selected with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.

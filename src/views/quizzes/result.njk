@@ -40,46 +40,21 @@
     </div>
   </section>
 
-  {% if report.questions.length %}
-    <section class="{{ ui.cardClass }}">
-      <h2 class="text-xl font-semibold">Correct by question type</h2>
-      <p class="text-sm text-muted mt-2">Correct answers out of the questions in this review, including skipped and unreached questions.</p>
-      <div class="mt-5 grid gap-5">
-        {% for category in ui.categoryResults(report.questions) %}
-          <div>
-            <div class="flex justify-between gap-3 mb-2"><span>{{ category.slug | replace('-', ' ') }}</span><span class="font-semibold">{{ category.correct }}/{{ category.total }}</span></div>
-            <progress class="quiz-progress" value="{{ category.correct }}" max="{{ category.total }}" aria-label="{{ category.slug | replace('-', ' ') }}: {{ category.correct }} correct out of {{ category.total }}"></progress>
-          </div>
-        {% endfor %}
-      </div>
-    </section>
-  {% endif %}
-
-  <section class="{{ ui.cardClass }}">
-    <h2 class="text-xl font-semibold">Keep the momentum going</h2>
-    <p class="page-description">Every round gives you something to build on. Review a method, then come back for a fresh challenge.</p>
-    <div class="mt-5 flex flex-wrap gap-3">
-      {% if skipFlagged.length %}
-        <a href="/tutorials?category={{ skipFlagged[0].categorySlug }}" class="{{ ui.buttonClass('primary', 'md') }}">Practice {{ skipFlagged[0].categorySlug | replace('-', ' ') }} →</a>
-      {% else %}
-        <a href="/tests" class="{{ ui.buttonClass('primary', 'md') }}">Choose your next challenge →</a>
-      {% endif %}
-    </div>
-  </section>
+  {% if coaching %}{% include "quizzes/coaching.njk" %}{% endif %}
 
   {# Coaching signal: questions where too much time was spent for nothing. #}
   {% if skipFlagged.length %}
     <section class="{{ ui.cardClass }}">
       <div class="flex items-center gap-2">
-        <h2 class="font-heading text-lg font-semibold text-ink mb-1">Find your rhythm</h2>
+        <h2 class="font-heading text-lg font-semibold text-ink mb-1">Worth another look</h2>
         <span class="{{ ui.badgeClass('warn') }}">{{ skipFlagged.length }}</span>
       </div>
-      <p class="text-sm text-muted mb-4">These questions took a little longer. Try the tips below, then practice spotting when to move on and save time for your strengths.</p>
+      <p class="text-sm text-muted mb-4">These questions took longer than the practice estimate and did not earn credit. Review the method before trying them again.</p>
       <div class="grid gap-3">
         {% for q in skipFlagged %}
           <div class="rounded-md border border-edge bg-fill p-4">
             <div class="flex flex-wrap items-start justify-between gap-4">
-              <p class="text-sm font-medium text-ink">Q{{ q.index + 1 }} · {{ q.prompt }}</p>
+              <p class="text-sm font-medium text-ink">Q{{ q.index + 1 }} · {{ q.visual.prompt if q.visual else q.prompt }}</p>
               <span class="shrink-0 {{ ui.badgeClass('warn') }}">{{ (q.timeMs / 1000) | round(1) }}s spent</span>
             </div>
             <p class="mt-1 text-xs text-muted">Expected ~{{ q.estSeconds }}s. The answer was {{ q.choices[q.correctIndex] }}.</p>
@@ -104,15 +79,24 @@
                 <span class="{{ ui.badgeClass('ok') }}">Correct</span>
               {% elif q.chosenIndex is none %}
                 <span class="{{ ui.badgeClass('neutral') }}">Skipped</span>
+              {% elif q.chosenIndex == q.correctIndex %}
+                <span class="{{ ui.badgeClass('warn') }}">Not credited</span>
               {% else %}
                 <span class="{{ ui.badgeClass('danger') }}">Incorrect</span>
               {% endif %}
               <span class="text-xs text-muted tabular-nums">{{ (q.timeMs / 1000) | round(1) }}s</span>
             </div>
           </div>
-          <p class="mt-2 text-sm text-ink">{{ q.prompt }}</p>
+          <p class="mt-2 text-sm text-ink">{{ q.visual.prompt if q.visual else q.prompt }}</p>
+          {% if q.visual %}<figure class="reasoning-diagram" role="img" aria-label="{{ q.visual.description }}">{{ q.visual.svg | safe }}</figure>{% endif %}
+          {% if q.chosenIndex is none %}
+            <p class="mt-2 text-sm text-muted">You skipped this question. Try the method below before your next session.</p>
+          {% elif q.isCorrect != 1 %}
+            <p class="mt-2 text-sm text-muted">You chose {{ q.choices[q.chosenIndex] }}. {% if q.chosenIndex == q.correctIndex %}That matches the answer but did not earn credit within the test budget.{% else %}Compare it with the correct answer and the reasoning below.{% endif %}</p>
+          {% endif %}
           <ul class="mt-2 grid gap-1 text-sm">
             {% for choice in q.choices %}
+              {% if q.visual and q.visual.choices[loop.index0] %}<li class="answer-diagram" aria-hidden="true">{{ q.visual.choices[loop.index0] | safe }}</li>{% endif %}
               {% if choice == q.choices[q.correctIndex] %}
                 <li class="text-ok">&#10003; {{ choice }} <span class="text-xs text-muted">(correct)</span></li>
               {% elif loop.index0 == q.chosenIndex %}
@@ -131,8 +115,7 @@
     </ol>
   </section>
 
-  <div class="flex flex-wrap gap-3">
-    <a href="/tutorials" class="{{ ui.buttonClass('secondary', 'md') }}">Build your skills</a>
+  <div>
     <a href="/tests" class="{{ ui.buttonClass('primary', 'md') }}">Back to tests</a>
   </div>
 </div>

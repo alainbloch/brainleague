@@ -257,30 +257,6 @@
 .quiz-progress::-moz-progress-bar {
   background: var(--brand-blue);
 }
-.question-view .choice {
-  min-height: 64px;
-  justify-content: flex-start;
-  gap: 1rem;
-  padding: 1rem;
-  border: 2px solid var(--edge);
-  background: var(--surface);
-  box-shadow: none;
-  text-align: left;
-}
-.question-view .choice:hover,
-.question-view .choice:focus-visible {
-  border-color: var(--brand-blue);
-  background: color-mix(in srgb, var(--brand-blue) 7%, var(--surface));
-}
-.choice-label {
-  display: inline-grid;
-  place-items: center;
-  min-width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: var(--fill);
-  font-weight: 700;
-}
 .result-summary {
   border-top: 5px solid var(--brand-blue);
 }

@@ -1,0 +1,29 @@
+<section class="{{ ui.cardClass }}">
+  <h2 class="font-heading text-lg font-semibold text-ink mb-2">Your category breakdown</h2>
+  <p class="text-sm text-muted mb-4">Accuracy is credited correct answers divided by selected answers. Skips are separate. Times are recorded by your browser and include skips; questions you never visited are not included.</p>
+  {% if coaching.categories.length %}
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% for category in coaching.categories %}
+        <article class="review-item">
+          <h3 class="font-semibold text-ink capitalize">{{ category.name }}</h3>
+          <p class="mt-2 text-2xl font-semibold text-ink">{% if category.accuracy is none %}—{% else %}{{ category.accuracy }}%{% endif %}<span class="text-sm font-normal text-muted"> accuracy</span></p>
+          {% if category.accuracy is not none %}<progress class="quiz-progress mt-3" value="{{ category.accuracy }}" max="100" aria-label="{{ category.name }} accuracy: {{ category.accuracy }} percent"></progress>{% endif %}
+          <p class="text-sm text-muted">{{ category.correct }} correct · {{ category.answered }} selected · {{ category.skipped }} skipped</p>
+          <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+            <div><dt class="text-muted">Recorded time</dt><dd class="text-ink">{% if category.timedQuestions %}{{ category.seconds | round(1) }}s{% else %}Not recorded{% endif %}</dd></div>
+            <div><dt class="text-muted">Average / question</dt><dd class="text-ink">{% if category.averageSeconds is none %}—{% else %}{{ category.averageSeconds | round(1) }}s{% endif %}</dd></div>
+          </dl>
+          <a href="/tutorials?category={{ category.slug | urlencode }}" class="inline-block mt-3 text-sm text-accent underline">Review this skill →</a>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}<p class="text-sm text-muted">No question responses were recorded for this attempt.</p>{% endif %}
+</section>
+<section class="{{ ui.cardClass }}">
+  <h2 class="font-heading text-lg font-semibold text-ink">{{ coaching.recommendation.title }}</h2>
+  <p class="mt-2 text-sm text-muted">{{ coaching.recommendation.reason }}</p>
+  <div class="mt-4 flex flex-wrap gap-3">
+    <a href="{{ coaching.recommendation.tutorialHref }}" class="{{ ui.buttonClass('secondary', 'md') }}">Learn the method</a>
+    <a href="{{ coaching.recommendation.testHref }}" class="{{ ui.buttonClass('primary', 'md') }}">Start {{ coaching.recommendation.testName }}</a>
+  </div>
+</section>

@@ -58,6 +58,7 @@ export interface ReportQuestion {
   timeMs: number;
   estSeconds: number;
   shouldHaveSkipped: boolean;
+  hasRecordedTime: boolean;
 }
 
 /** Full result-report payload: summary + per-question replay + test meta. */
@@ -129,7 +130,12 @@ export class QuizEngine {
   attempts: AttemptsRepository;
   clock: () => number;
 
-  constructor({ testsRepo, questionsRepo, attemptsRepo, clock = () => Date.now() }: QuizEngineOptions) {
+  constructor({
+    testsRepo,
+    questionsRepo,
+    attemptsRepo,
+    clock = () => Date.now(),
+  }: QuizEngineOptions) {
     this.tests = testsRepo;
     this.questions = questionsRepo;
     this.attempts = attemptsRepo;
@@ -195,7 +201,9 @@ export class QuizEngine {
     }
 
     const test = this.tests.findById(attempt.testTypeId)!;
-    const byQuestion = new Map(this.questions.listForTestType(attempt.testTypeId).map((q) => [q.id, q]));
+    const byQuestion = new Map(
+      this.questions.listForTestType(attempt.testTypeId).map((q) => [q.id, q]),
+    );
     this.#validateAnswers(answers, byQuestion);
 
     const persisted = answers.map((a, _index) => {
@@ -206,7 +214,8 @@ export class QuizEngine {
         questionIndex: _index,
         chosenIndex: a.chosenIndex,
         isCorrect: a.chosenIndex !== null && a.chosenIndex === q.correctIndex ? 1 : 0,
-        timeMs: Math.max(0, Math.min(a.timeMs ?? 0, test.durationSeconds * 1000)),
+        timeMs:
+          a.timeMs === null ? null : Math.max(0, Math.min(a.timeMs, test.durationSeconds * 1000)),
       };
     });
     this.attempts.replaceAnswers(attemptId, persisted);
@@ -221,17 +230,14 @@ export class QuizEngine {
   submit(attemptId: string, userId: string, answers: SubmitAnswer[]): AttemptResult {
     const attempt = this.attempts.findByIdForUser(attemptId, userId);
     if (!attempt) throw new Error('Attempt not found for this user.');
-    if (!this.attempts.hasAnswers(attemptId) && answers.length) {
-      // A submit may arrive with the full answer set even if the client never
-      // called saveProgress (e.g. the very first interaction is a submit).
-      this.saveProgress(attemptId, userId, answers);
-    }
     if (attempt.status !== 'in_progress') {
       throw new Error('This attempt was already submitted.');
     }
 
     const test = this.tests.findById(attempt.testTypeId)!;
-    const byQuestion = new Map(this.questions.listForTestType(attempt.testTypeId).map((q) => [q.id, q]));
+    const byQuestion = new Map(
+      this.questions.listForTestType(attempt.testTypeId).map((q) => [q.id, q]),
+    );
 
     const budgetMs = test.durationSeconds * 1000;
     const now = this.clock();
@@ -247,7 +253,7 @@ export class QuizEngine {
     let reachedCount = 0;
     let cumulativeMs = 0;
 
-    answers.forEach((a) => {
+    const gradedAnswers = answers.map((a, questionIndex) => {
       const q = byQuestion.get(a.questionId)!;
       const clampedTime = Math.max(0, Math.min(a.timeMs ?? 0, budgetMs));
       const withinBudget = cumulativeMs + clampedTime <= budgetMs;
@@ -257,7 +263,18 @@ export class QuizEngine {
 
       if (a.chosenIndex !== null && withinBudget) reachedCount += 1;
       if (isCorrect && withinBudget) correctCount += 1;
+      return {
+        attemptId,
+        questionId: a.questionId,
+        questionIndex,
+        chosenIndex: a.chosenIndex,
+        isCorrect: isCorrect && withinBudget ? 1 : 0,
+        timeMs: a.timeMs === null ? null : clampedTime,
+      };
     });
+    // An earlier autosave may contain only a prefix. Persist the final graded
+    // payload so category metrics and per-question review match the total score.
+    this.attempts.replaceAnswers(attemptId, gradedAnswers);
 
     const elapsedMs = timedOut ? budgetMs : now - attempt.startedAt;
     const status = timedOut ? 'timed_out' : 'submitted';
@@ -377,6 +394,7 @@ export class QuizEngine {
         timeMs,
         estSeconds: q?.estSeconds ?? 0,
         shouldHaveSkipped,
+        hasRecordedTime: a.timeMs !== null,
       };
     });
 
@@ -393,10 +411,7 @@ export class QuizEngine {
   }
 
   /** Validate the submitted answer set: all on-test, no duplicates. */
-  #validateAnswers(
-    answers: SubmitAnswer[],
-    byQuestion: Map<string, Question>,
-  ): void {
+  #validateAnswers(answers: SubmitAnswer[], byQuestion: Map<string, Question>): void {
     const seen = new Set<string>();
     for (const a of answers) {
       if (!byQuestion.has(a.questionId)) {
