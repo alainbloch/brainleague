@@ -4,11 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}{{ pageTitle }}{% endblock %} · Brain League</title>
+    <link rel="icon" type="image/svg+xml" sizes="any" href="/assets/images/BrainLeague-emblem.svg" />
     <link rel="stylesheet" href="/assets/css/app.min.css" />
   </head>
   <body class="{% block bodyClass %}{% endblock %} min-h-screen bg-canvas text-ink font-sans antialiased">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:block focus:p-3">Skip to content</a>
-    <header class="border-b border-edge">
+    <header class="border-b border-edge bg-white">
       <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3">
         <a href="/" class="flex items-center gap-2" aria-label="BrainLeague home">
           <img src="/assets/images/BrainLeague-emblem.svg" alt="" class="h-7 w-auto" />
