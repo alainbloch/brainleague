@@ -54,28 +54,33 @@
         <h2 class="font-heading text-2xl font-medium tracking-[-0.02em] text-ink sm:text-3xl">
           Pick a brain test and go head-to-head
         </h2>
-        <div class="mt-8 grid gap-px overflow-hidden border border-edge bg-edge">
-          {% if not tests.length %}
-            <p class="bg-surface p-6 text-sm text-muted">No practice tests are available yet — check back soon.</p>
-          {% else %}
+        {% if not tests.length %}
+          <p class="mt-8 max-w-xl text-sm text-muted">No practice tests are available yet — check back soon.</p>
+        {% else %}
+          <div class="mt-8 grid gap-6 sm:grid-cols-2">
             {% for test in tests %}
-              <div class="flex flex-wrap items-center justify-between gap-4 bg-surface px-6 py-5">
-                <div class="min-w-0">
-                  <h3 class="font-heading text-lg font-medium text-ink">{{ test.name }}</h3>
-                  <p class="mt-0.5 text-sm text-muted">
-                    {{ test.questionCount }} questions · {{ (test.durationSeconds / 60) | round(0, 'floor') }} min · by {{ test.publisher }}
-                  </p>
+              <article class="flex flex-col gap-5 rounded-lg border border-edge bg-surface p-6">
+                <div>
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h3 class="font-heading text-xl font-medium tracking-tight text-ink">{{ test.name }}</h3>
+                    <span class="text-xs text-muted">by {{ test.publisher }}</span>
+                  </div>
+                  <div class="mt-4 flex flex-wrap gap-2 text-sm">
+                    <span class="{{ ui.badgeClass('neutral') }}">{{ test.questionCount }} questions</span>
+                    <span class="{{ ui.badgeClass('neutral') }}">{{ (test.durationSeconds / 60) | round(0, 'floor') }} min</span>
+                    {% if test.noGoingBack %}<span class="{{ ui.badgeClass('neutral') }}">No going back</span>{% endif %}
+                  </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <a href="/tests/{{ test.slug }}/leaderboard" class="text-sm font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline">Leaderboard</a>
-                  <a href="/tests/{{ test.slug }}/take">
-                    <button type="button" class="{{ ui.buttonClass('primary', 'sm') }}">Take the test</button>
+                <div class="mt-auto flex flex-col gap-2">
+                  <a href="/tests/{{ test.slug }}/take" class="w-full">
+                    <button type="button" class="{{ ui.buttonClass('primary', 'md') }} w-full py-2">Start {{ test.name }} →</button>
                   </a>
+                  <a href="/tests/{{ test.slug }}/leaderboard" class="text-center text-sm font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline">See the leaderboard</a>
                 </div>
-              </div>
+              </article>
             {% endfor %}
-          {% endif %}
-        </div>
+          </div>
+        {% endif %}
       </div>
     </div>
   </section>
