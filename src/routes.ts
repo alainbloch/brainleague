@@ -5,6 +5,7 @@ import type { SettingsController } from './controllers/settingsController.js';
 import type { UsersController } from './controllers/usersController.js';
 import type { NotificationsController } from './controllers/notificationsController.js';
 import type { AdminController } from './controllers/adminController.js';
+import type { LeaderboardController } from './controllers/leaderboardController.js';
 
 export interface RouteDependencies {
   authController: AuthController;
@@ -13,6 +14,7 @@ export interface RouteDependencies {
   usersController: UsersController;
   notificationsController: NotificationsController;
   adminController: AdminController;
+  leaderboardController: LeaderboardController;
   authMiddleware: (
     request: import('fastify').FastifyRequest,
     reply: import('fastify').FastifyReply,
@@ -24,7 +26,7 @@ export interface RouteDependencies {
 }
 
 /**
- * Routes for public pages, auth, settings, the social layer, and admin.
+ * Routes for public pages, auth, settings, the social layer, quizzes, and admin.
  */
 export async function registerRoutes(
   app: FastifyInstance,
@@ -35,6 +37,7 @@ export async function registerRoutes(
     usersController,
     notificationsController,
     adminController,
+    leaderboardController,
     authMiddleware,
     adminMiddleware,
   }: RouteDependencies,
@@ -123,7 +126,7 @@ export async function registerRoutes(
     usersController.removeFriend.bind(usersController),
   );
 
-  // Notification inbox (future-facing but wired today)
+  // Notification inbox
   app.get(
     '/notifications',
     { preHandler: authMiddleware },
@@ -133,6 +136,18 @@ export async function registerRoutes(
     '/notifications/read',
     { preHandler: authMiddleware },
     notificationsController.markAllRead.bind(notificationsController),
+  );
+
+  // Leaderboards (per-test global + friends)
+  app.get(
+    '/tests/:slug/leaderboard',
+    { preHandler: authMiddleware },
+    leaderboardController.showGlobal.bind(leaderboardController),
+  );
+  app.get(
+    '/tests/:slug/leaderboard/friends',
+    { preHandler: authMiddleware },
+    leaderboardController.showFriends.bind(leaderboardController),
   );
 
   // Admin (role-gated)

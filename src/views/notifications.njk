@@ -24,6 +24,8 @@
             <span class="mt-0.5 text-info">{{ '🔔' }}</span>
           {% elif item.type === 'friend-accepted' %}
             <span class="mt-0.5 text-ok">{{ '✅' }}</span>
+          {% elif item.type === 'friend-score' %}
+            <span class="mt-0.5 text-info">{{ '🏆' }}</span>
           {% else %}
             <span class="mt-0.5 text-muted">{{ 'ℹ️' }}</span>
           {% endif %}
@@ -44,6 +46,18 @@
                 accepted your friend request.
               </p>
               <p class="text-xs text-muted">{{ ui.relativeDate(item.createdAt) }}</p>
+            {% elif item.type === 'friend-score' %}
+              <p class="text-ink">
+                <a href="/users/{{ item.payload.userId | default('') }}" class="font-medium underline-offset-4 hover:underline">
+                  {{ item.payload.userName | default('A friend') }}
+                </a>
+                scored {{ item.payload.correctCount }}/{{ item.payload.totalQuestions }} on
+                {{ item.payload.testTypeName | default('a timed test') }}.
+              </p>
+              <p class="text-xs text-muted">
+                {{ ui.relativeDate(item.createdAt) }} ·
+                <a href="/tests/{{ item.payload.testTypeSlug | default('') }}/leaderboard" class="underline-offset-4 hover:underline">Watch the leaderboard</a>
+              </p>
             {% else %}
               <p class="text-ink">{{ item.payload.message | default('You have a new notification.') }}</p>
               <p class="text-xs text-muted">{{ ui.relativeDate(item.createdAt) }}</p>

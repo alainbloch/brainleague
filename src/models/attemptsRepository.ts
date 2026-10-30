@@ -163,6 +163,28 @@ export class AttemptsRepository {
       .all(attemptId) as AttemptAnswer[];
   }
 
+  /**
+   * Every finished (submitted or timed_out) attempt for a test, sorted best-first
+   * by the global leaderboard key (correct, then reached, then fastest elapsed).
+   * Ties are left unresolved and finished_at/id give a deterministic fallback;
+   * the leaderboard service collapses each user to their first (best) row and
+   * assigns competition ranks.
+   */
+  listFinishedForTest(testTypeId: string): Attempt[] {
+    return (
+      this.db
+        .prepare(
+          `SELECT ${ATTEMPT_COLUMNS} FROM attempts
+           WHERE test_type_id = ? AND status IN ('submitted', 'timed_out')
+           ORDER BY correct_count DESC, reached_count DESC, elapsed_ms ASC,
+                    finished_at ASC, id ASC`,
+        )
+        .all(testTypeId) as AttemptRow[]
+    )
+      .map(mapAttempt)
+      .filter((a): a is Attempt => a !== null);
+  }
+
   hasAnswers(attemptId: string): boolean {
     const row = this.db
       .prepare('SELECT COUNT(*) AS n FROM attempt_answers WHERE attempt_id = ?')
