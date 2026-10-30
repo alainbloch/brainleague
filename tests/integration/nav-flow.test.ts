@@ -87,7 +87,7 @@ test('help (tutorials) page lists seeded categories and a category filter works'
   ).run(Date.now(), Date.now());
 
   const all = await request(app.server as Server).get('/tutorials').set('Cookie', cookie).expect(200);
-  assert.match(all.text, /Tips & tutorials/);
+  assert.match(all.text, /Tips &amp; tutorials/);
   assert.match(all.text, /Analogies/);
 
   const filtered = await request(app.server as Server).get('/tutorials?category=analogies').set('Cookie', cookie).expect(200);

@@ -1,26 +1,24 @@
 {% extends "layouts/base.njk" %}
+{% from "components/page.njk" import heading, empty %}
+{% from "components/home-graphics.njk" import graphic %}
 {% import "components/forms.njk" as forms %}
 
 {% block content %}
-<div class="grid gap-6">
-  <div>
-    <h1 class="font-heading text-2xl font-semibold text-ink">Practice tests</h1>
-    <p class="mt-1 text-sm text-muted">Take a timed practice test. Answers are graded by the server — there is no going back once you answer.</p>
-  </div>
+<div class="page-stack">
+  {{ heading('Practice tests', 'Pick a challenge, find your rhythm, and give your personal best a little competition.', 'tests') }}
 
   {% if error %}
     {{ forms.alert(error, 'danger') }}
   {% endif %}
 
   {% if tests.length === 0 %}
-    <section class="{{ ui.cardClass }}">
-      <p class="text-sm text-muted">No practice tests are available yet. Check back soon.</p>
-    </section>
+    {{ empty('Your next challenge is on its way', 'Explore a few tips while we get the next rounds ready.', '/tutorials', 'Explore tips', 'tests') }}
   {% else %}
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div class="card-grid">
       {% for test in tests %}
-        <section class="{{ ui.cardClass }}">
-          <div class="flex items-start justify-between gap-4">
+        <section class="{{ ui.cardClass }} challenge-card">
+          {{ graphic("tests") }}
+          <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="min-w-0">
               <h2 class="font-heading text-lg font-semibold text-ink">{{ test.name }}</h2>
               <p class="text-xs text-muted">by {{ test.publisher }}</p>
@@ -39,16 +37,12 @@
               <dd class="font-medium text-ink">{{ (test.durationSeconds / 60) | round(0, 'floor') }} min</dd>
             </div>
           </dl>
-          <div class="mt-5 flex flex-wrap gap-2">
-            <a href="/tests/{{ test.slug }}/take">
-              <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Start test</button>
-            </a>
-            <a href="/tests/{{ test.slug }}/leaderboard">
-              <button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Leaderboard</button>
-            </a>
-            <a href="/tests/{{ test.slug }}/leaderboard/friends">
-              <button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Friends</button>
-            </a>
+          <div class="card-actions">
+            <a href="/tests/{{ test.slug }}/take" class="{{ ui.buttonClass('primary', 'md') }}">Start test →</a>
+            <div class="flex flex-wrap justify-center gap-4 text-sm">
+              <a href="/tests/{{ test.slug }}/leaderboard" class="py-2 underline underline-offset-4">Leaderboard</a>
+              <a href="/tests/{{ test.slug }}/leaderboard/friends" class="py-2 underline underline-offset-4">Friends</a>
+            </div>
           </div>
         </section>
       {% endfor %}

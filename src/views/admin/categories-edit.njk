@@ -4,7 +4,7 @@
 {% block content %}
 <div class="mx-auto max-w-2xl grid gap-6">
   <header class="grid gap-1">
-    <h1 class="font-heading text-2xl font-semibold text-ink">Edit category · {{ values.slug }}</h1>
+    <h1 class="page-title font-heading text-2xl font-semibold text-ink">Edit category · {{ values.slug }}</h1>
   </header>
 
   {% if error %}<div class="mb-4">{{ forms.alert(error, "danger") }}</div>{% endif %}
@@ -13,7 +13,7 @@
     <form method="post" action="/admin/categories/{{ values.slug }}/edit" class="grid gap-4">
       <input type="hidden" name="slug" value="{{ values.slug }}" />
       {{ forms.field("name", "Name", { value: values.name, required: true, hint: "Human-readable, e.g. Number series." }) }}
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <a href="/admin/categories" class="text-sm text-ink-soft underline-offset-4 hover:underline">← Back to categories</a>
         <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Save category</button>
       </div>

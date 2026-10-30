@@ -4,7 +4,7 @@
 {% block content %}
 <div class="mx-auto max-w-2xl grid gap-6">
   <header class="grid gap-1">
-    <h1 class="font-heading text-2xl font-semibold text-ink">Edit user</h1>
+    <h1 class="page-title font-heading text-2xl font-semibold text-ink">Edit user</h1>
     <p class="text-sm text-muted">
       Edit {{ target.name }}'s profile
       {% if target.role === 'admin' %} · Administrator{% else %} · User{% endif %}
@@ -20,7 +20,7 @@
       {{ forms.field("name", "Name", { value: values.name, required: true }) }}
       {{ forms.field("email", "Email", { type: "email", value: values.email, required: true, hint: "Changing the email signs the user out of existing sessions." }) }}
       {{ forms.field("password", "New password", { type: "password", autocomplete: "new-password", placeholder: "Leave blank to keep current", hint: "8–128 characters. Setting one signs the user out of existing sessions." }) }}
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <a href="/admin/users" class="text-sm text-ink-soft underline-offset-4 hover:underline">← Back to users</a>
         <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Save changes</button>
       </div>

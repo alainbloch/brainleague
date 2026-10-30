@@ -4,7 +4,7 @@
 {% block content %}
 <div class="mx-auto max-w-2xl grid gap-6">
   <header class="grid gap-1">
-    <h1 class="font-heading text-2xl font-semibold text-ink">New category</h1>
+    <h1 class="page-title font-heading text-2xl font-semibold text-ink">New category</h1>
     <p class="text-sm text-muted">A category classifies questions and tags tutorials.</p>
   </header>
 
@@ -14,7 +14,7 @@
     <form method="post" action="/admin/categories" class="grid gap-4">
       {{ forms.field("slug", "Slug", { value: values.slug, required: true, hint: "Lowercase, URL-friendly, e.g. number-series." }) }}
       {{ forms.field("name", "Name", { value: values.name, required: true, hint: "Human-readable, e.g. Number series." }) }}
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <a href="/admin/categories" class="text-sm text-ink-soft underline-offset-4 hover:underline">← Back to categories</a>
         <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Create category</button>
       </div>

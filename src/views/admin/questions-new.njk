@@ -4,7 +4,7 @@
 {% block content %}
 <div class="mx-auto max-w-3xl grid gap-6">
   <header class="grid gap-1">
-    <h1 class="font-heading text-2xl font-semibold text-ink">New question</h1>
+    <h1 class="page-title font-heading text-2xl font-semibold text-ink">New question</h1>
     <p class="text-sm text-muted">Add a multiple-choice question to the bank.</p>
   </header>
 
@@ -17,7 +17,7 @@
 
       <fieldset class="grid gap-2">
         <legend class="text-sm font-medium text-ink">Choices</legend>
-        {% set choices = values.choices is iterable ? values.choices : [values.choices] %}
+        {% set choices = [values.choices] if values.choices is string else (values.choices or []) %}
         {% for i in range(0, 3) %}
           <label class="flex items-center gap-2 text-sm text-ink-soft">
             <span class="w-6 font-mono text-muted">{{ loop.index }}.</span>
@@ -56,7 +56,7 @@
       {{ forms.field("estSeconds", "Expected solve time (seconds)", { type: "number", step: "any", value: values.estSeconds, required: true, hint: "Used to order questions easier-to-harder." }) }}
       {{ forms.field("explanation", "Explanation", { as: "textarea", rows: 2, value: values.explanation, hint: "Shown after the result / in tutorials." }) }}
 
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <a href="/admin/questions" class="text-sm text-ink-soft underline-offset-4 hover:underline">← Back to questions</a>
         <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Create question</button>
       </div>

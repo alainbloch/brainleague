@@ -7,12 +7,22 @@
   </p>
   <article class="grid gap-4">
     <header class="grid gap-1">
-      <span class="text-xs uppercase tracking-wide text-muted">{{ tutorial.categorySlug }}</span>
-      <h1 class="font-heading text-2xl font-semibold text-ink">{{ tutorial.title }}</h1>
+      <span class="text-xs uppercase tracking-wide text-muted">{{ tutorial.categorySlug | replace('-', ' ') }}</span>
+      <h1 class="page-title font-heading text-2xl font-semibold text-ink">{{ tutorial.title }}</h1>
     </header>
-    <div class="rounded-lg border border-edge bg-surface p-6 text-sm leading-relaxed text-ink-soft prose prose-sm">
-      {{ tutorial.body | escape | replace('\n', '<br />') | safe }}
-    </div>
+    {% for section in ui.tutorialSections(tutorial.body) %}
+      {% if section.tone == 'answer' %}
+        <details class="learning-section learning-tip">
+          <summary>{{ section.title }}</summary>
+          <p>{{ section.text }}</p>
+        </details>
+      {% else %}
+        <section class="learning-section learning-{{ section.tone }}">
+          <h2>{{ section.title }}</h2>
+          <p>{{ section.text }}</p>
+        </section>
+      {% endif %}
+    {% endfor %}
     <a href="/tests" class="{{ ui.buttonClass('primary', 'md') }}">Try a practice test →</a>
   </article>
 </div>

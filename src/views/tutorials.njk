@@ -1,14 +1,13 @@
 {% extends "layouts/base.njk" %}
+{% from "components/page.njk" import heading, empty %}
+{% from "components/home-graphics.njk" import graphic %}
 
 {% block content %}
-<div class="grid gap-6">
-  <header class="grid gap-1">
-    <h1 class="font-heading text-2xl font-semibold text-ink">Tips & tutorials</h1>
-    <p class="text-sm text-muted">Learn a method, follow a worked example, then try a self-check. Practice accuracy first and build speed with focused workouts.</p>
-  </header>
+<div class="page-stack">
+  {{ heading("Tips & tutorials", "Small discoveries. Big aha! moments. Find a method, follow an example, then give it a go.", "patterns") }}
 
   {% if categories.length %}
-    <nav class="flex flex-wrap gap-2 text-sm" aria-label="Filter by question type">
+    <nav class="filter-pills text-sm" aria-label="Filter by question type">
       <a href="/tutorials" class="{{ ui.buttonClass('secondary', 'sm') if categorySlug else ui.buttonClass('primary', 'sm') }}">All</a>
       {% for c in categories %}
         <a href="/tutorials?category={{ c.slug }}" class="{{ ui.buttonClass('secondary', 'sm') if categorySlug !== c.slug else ui.buttonClass('primary', 'sm') }}">{{ c.name }}</a>
@@ -17,19 +16,18 @@
   {% endif %}
 
   {% if tutorials.length === 0 %}
-    <section class="{{ ui.cardClass }}">
-      <p class="text-sm text-muted">No tutorials for this question type yet.</p>
-    </section>
+    {{ empty('More tips are on the way', 'Try another question type or explore the full collection.', '/tutorials', 'See all tutorials') }}
   {% else %}
-    <ul class="grid gap-3">
+    <ul class="card-grid">
       {% for item in tutorials %}
         <li>
-          <a href="/tutorials/{{ item.slug }}" class="block rounded-lg border border-edge bg-surface p-4 hover:border-accent">
-            <div class="flex items-start justify-between gap-3">
+          <a href="/tutorials/{{ item.slug }}" class="{{ ui.cardClass }} interactive-card block h-full">
+            <div class="w-16 mb-4">{{ graphic("patterns") }}</div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
               <h2 class="font-heading text-base font-semibold text-ink">{{ item.title }}</h2>
-              {% if categorySlug %}<span class="shrink-0 text-xs text-muted">{{ item.categorySlug | replace('-', ' ') }}</span>{% endif %}
+              <span class="shrink-0 text-xs text-muted">{{ item.categorySlug | replace('-', ' ') }}</span>
             </div>
-            <p class="mt-1 text-sm text-muted">{{ item.body | striptags | truncate(120) }}</p>
+            <p class="mt-1 text-sm text-muted">{% set sections = ui.tutorialSections(item.body) %}{{ sections[0].text | default('Explore this lesson.') | truncate(120) }}</p>
           </a>
         </li>
       {% endfor %}

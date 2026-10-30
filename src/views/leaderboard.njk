@@ -1,13 +1,15 @@
 {% extends "layouts/base.njk" %}
+{% from "components/page.njk" import heading, empty %}
+{% from "components/home-graphics.njk" import graphic %}
 
 {% block content %}
-<div class="grid gap-6">
+<div class="page-stack">
   <header class="flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <h1 class="font-heading text-2xl font-semibold text-ink">{{ test.name }} · Leaderboard</h1>
-      <p class="mt-1 text-sm text-muted">Ranked by best finished attempt.</p>
-    </div>
-    <nav class="flex gap-1 rounded-lg border border-edge bg-surface p-1 text-sm">
+    <div class="flex items-center gap-4"><div class="w-16">{{ graphic("podium") }}</div><div>
+      <h1 class="page-title font-heading text-2xl font-semibold text-ink">{{ test.name }} · Leaderboard</h1>
+      <p class="mt-1 text-sm text-muted">Ranked by best finished attempt. Every personal best counts.</p>
+    </div></div>
+    <nav class="filter-pills flex gap-1 rounded-lg border border-edge bg-surface p-1 text-sm">
       <a href="/tests/{{ test.slug }}/leaderboard"
          class="rounded-md px-3 py-1.5 {{ 'bg-accent text-on-accent font-medium' if tab === 'global' else 'text-ink-soft hover:text-ink' }}">
         Global
@@ -20,36 +22,35 @@
   </header>
 
   {% if board.entries.length === 0 %}
-    <section class="{{ ui.cardClass }}">
-      <p class="text-sm text-muted">
-        No finished attempts yet{% if tab === 'friends' %} from your friends{% endif %}.
-      </p>
-    </section>
+    {{ empty('The podium is waiting', 'Finish a challenge to get the friendly competition started.', '/tests', 'Find a challenge', 'podium') }}
   {% else %}
-    <table class="w-full border-collapse overflow-hidden rounded-lg border border-edge bg-surface text-sm">
+    <div class="table-frame" role="region" aria-label="Leaderboard standings" tabindex="0">
+    <table class="league-table">
+      <caption class="sr-only">{{ test.name }} rankings</caption>
       <thead>
         <tr class="border-b border-edge text-left text-xs uppercase tracking-wide text-muted">
           <th class="px-4 py-2.5 font-medium">Rank</th>
           <th class="px-4 py-2.5 font-medium">User</th>
           <th class="px-4 py-2.5 text-right font-medium">Score</th>
-          <th class="px-4 py-2.5 text-right font-medium">Reached</th>
+          <th class="hidden sm:table-cell px-4 py-2.5 text-right font-medium">Reached</th>
           <th class="hidden px-4 py-2.5 text-right font-medium sm:table-cell">Time</th>
         </tr>
       </thead>
       <tbody>
         {% for entry in board.entries %}
-          <tr class="border-b border-edge last:border-b-0">
-            <td class="px-4 py-2.5 font-semibold text-ink">{{ entry.rank }}</td>
+          <tr class="{{ 'self-row' if user and entry.userId == user.id else '' }}">
+            <td class="px-4 py-2.5 font-semibold text-ink"><span class="rank-medal rank-{{ entry.rank }}">{{ entry.rank }}</span></td>
             <td class="px-4 py-2.5">
-              <a href="/users/{{ entry.userId }}" class="font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline">{{ entry.name }}</a>
+              <a href="/users/{{ entry.userId }}" class="league-person font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline"><span class="avatar" aria-hidden="true">{{ ui.initials(entry.name) }}</span><span>{{ entry.name }}{% if user and entry.userId == user.id %} <span class="text-xs text-muted">(you)</span>{% endif %}</span></a>
             </td>
             <td class="px-4 py-2.5 text-right font-semibold text-accent">{{ entry.correctCount }}<span class="text-xs font-normal text-muted">/{{ entry.totalQuestions }}</span></td>
-            <td class="px-4 py-2.5 text-right text-muted">{{ entry.reachedCount }}</td>
+            <td class="hidden sm:table-cell px-4 py-2.5 text-right text-muted">{{ entry.reachedCount }}</td>
             <td class="hidden px-4 py-2.5 text-right text-muted sm:table-cell">{{ (entry.elapsedMs / 1000) | round(0) }}s</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
+    </div>
 
     {% if board.pages > 1 %}
       <nav class="flex items-center gap-2 text-sm" aria-label="Pagination">

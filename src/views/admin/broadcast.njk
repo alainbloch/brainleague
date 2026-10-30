@@ -4,7 +4,7 @@
 {% block content %}
 <div class="mx-auto max-w-2xl grid gap-6">
   <header class="grid gap-1">
-    <h1 class="font-heading text-2xl font-semibold text-ink">Broadcast notification</h1>
+    <h1 class="page-title font-heading text-2xl font-semibold text-ink">Broadcast notification</h1>
     <p class="text-sm text-muted">Send a system notification to every user on the instance ({{ stats.users }} recipients).</p>
   </header>
 
@@ -18,7 +18,7 @@
   <section class="{{ ui.cardClass }}">
     <form method="post" action="/admin/broadcast" class="grid gap-4">
       {{ forms.field("message", "Message", { as: "textarea", rows: 5, value: values.message, placeholder: "Announcement for all users…", required: true, hint: "Shown in every user's notification inbox, marked unread." }) }}
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <a href="/admin" class="text-sm text-ink-soft underline-offset-4 hover:underline">← Back to admin</a>
         <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Send to all users</button>
       </div>

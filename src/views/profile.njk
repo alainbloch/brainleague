@@ -1,4 +1,6 @@
 {% extends "layouts/base.njk" %}
+{% from "components/page.njk" import heading, empty %}
+{% from "components/home-graphics.njk" import graphic %}
 {% import "components/forms.njk" as forms %}
 
 {% block content %}
@@ -7,16 +9,16 @@
     <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
   {% endif %}
 
-  <section class="{{ ui.cardClass }}">
+  <section class="{{ ui.cardClass }} profile-header">
     <div class="flex flex-wrap items-center gap-4">
       {% if profile.user.avatarPath %}
         <img src="/uploads/{{ profile.user.avatarPath }}" alt="{{ profile.user.name }}"
-          class="size-16 rounded-pill object-cover border border-edge" />
+          class="avatar profile-avatar size-16 rounded-pill object-cover border border-edge" />
       {% else %}
-        <span class="inline-flex size-16 items-center justify-center rounded-pill bg-raised text-ink-soft font-semibold">{{ ui.initials(profile.user.name) }}</span>
+        <span class="avatar profile-avatar inline-flex size-16 items-center justify-center rounded-pill bg-raised text-ink-soft font-semibold">{{ ui.initials(profile.user.name) }}</span>
       {% endif %}
       <div class="min-w-0 grid gap-1">
-        <h1 class="font-heading text-2xl font-semibold text-ink">{{ profile.user.name }}</h1>
+        <h1 class="page-title font-heading text-2xl font-semibold text-ink">{{ profile.user.name }}</h1>
         <p class="text-sm text-muted">
           Member since {{ ui.date(profile.user.createdAt) }}
           {% if profile.user.role === 'admin' %}<span class="ml-2 {{ ui.badgeClass('accent') }}">Admin</span>{% endif %}
@@ -24,7 +26,7 @@
       </div>
 
       {% if profile.relationship !== 'self' %}
-        <div class="ml-auto flex items-center gap-2">
+        <div class="profile-actions ml-auto flex items-center gap-2">
           {% if profile.relationship === 'friends' %}
             <span class="{{ ui.badgeClass('ok') }}">Friends</span>
             <form method="post" action="/users/{{ profile.user.id }}/unfriend">
@@ -56,12 +58,12 @@
   <section class="{{ ui.cardClass }}">
     <h2 class="font-heading text-base font-semibold mb-4">Friends ({{ profile.friends.length }})</h2>
     {% if profile.friends.length === 0 %}
-      <p class="text-sm text-muted">No friends yet.</p>
+      {{ empty('Good company starts with hello', 'Find a familiar face or meet someone new in the league.', '/users', 'Find your crew', 'podium') }}
     {% else %}
       <ul class="grid gap-2 sm:grid-cols-2">
         {% for friend in profile.friends %}
           <li>
-            <a href="/users/{{ friend.id }}" class="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-ink-soft hover:bg-fill hover:text-ink">
+            <a href="/users/{{ friend.id }}" class="interactive-card flex items-center gap-3 rounded-lg border border-edge p-3 text-sm text-ink-soft hover:bg-fill hover:text-ink">
               {% if friend.avatarPath %}
                 <img src="/uploads/{{ friend.avatarPath }}" alt="" class="size-7 rounded-pill object-cover" />
               {% else %}

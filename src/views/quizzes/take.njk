@@ -1,34 +1,35 @@
 {% extends "layouts/base.njk" %}
 
 {% block content %}
-<div class="grid gap-6">
-  <div class="flex flex-wrap items-center justify-between gap-3">
+<div class="page-stack quiz-shell">
+  <div class="quiz-status flex flex-wrap items-center justify-between gap-3">
     <div>
-      <h1 class="font-heading text-xl font-semibold text-ink">Test in progress</h1>
+      <h1 class="page-title font-heading text-xl font-semibold text-ink">Test in progress</h1>
       <p class="text-xs text-muted">Question <span id="progress-current">1</span> of <span id="progress-total">{{ questions.length }}</span></p>
     </div>
     <div class="flex items-center gap-3">
-      <span class="{{ ui.badgeClass('danger') }}" id="timer-label">Time</span>
-      <span class="font-semibold text-ink tabular-nums" id="timer">--:--</span>
+      <span class="{{ ui.badgeClass('neutral') }}" id="timer-label">Time</span>
+      <span class="quiz-timer font-semibold text-ink" id="timer">--:--</span>
     </div>
   </div>
 
+  <progress id="quiz-progress" class="quiz-progress" value="0" max="{{ questions.length }}" aria-label="Questions completed"></progress>
   <section class="{{ ui.cardClass }}">
     <div id="quiz" class="grid gap-6">
       {% for q in questions %}
         <div class="question-view hidden grid gap-5" data-question-id="{{ q.id }}" data-index="{{ loop.index0 }}">
           <div>
             <p class="text-xs text-muted mb-1">Q{{ loop.index }} · {{ q.categorySlug | replace('-', ' ') }}</p>
-            <h2 class="font-heading text-lg font-medium text-ink leading-snug">{{ q.prompt }}</h2>
+            <h2 class="font-heading text-2xl font-medium text-ink leading-snug">{{ q.prompt }}</h2>
             <p class="mt-1 text-xs text-muted">Typical solve time: ~{{ q.estSeconds }}s</p>
           </div>
           <div class="grid gap-2">
             {% for choice in q.choices %}
-              <button type="button" class="choice text-left {{ ui.buttonClass('secondary', 'md') }}" data-index="{{ loop.index0 }}">{{ choice }}</button>
+              <button type="button" class="choice text-left {{ ui.buttonClass('secondary', 'md') }}" data-index="{{ loop.index0 }}"><span class="choice-label" aria-hidden="true">{{ loop.index }}</span><span>{{ choice }}</span></button>
             {% endfor %}
           </div>
           <div class="flex justify-between">
-            <button type="button" class="skip-btn {{ ui.buttonClass('tertiary', 'md') }}">Skip — I can't answer this</button>
+            <button type="button" class="skip-btn {{ ui.buttonClass('tertiary', 'md') }}">Skip this question →</button>
           </div>
         </div>
       {% endfor %}
@@ -66,6 +67,7 @@
     v.classList.remove('hidden');
     questionStart = Date.now();
     progressCurrent.textContent = String(idx + 1);
+    document.getElementById('quiz-progress').value = idx;
     progressTotal.textContent = String(views.length);
   }
 
@@ -128,7 +130,7 @@
   var timerHandle = setInterval(function () {
     var remaining = deadlineMs - Date.now();
     timerEl.textContent = fmt(remaining);
-    if (remaining < 20000) timerLabel.textContent = 'Hurry!';
+    if (remaining < 20000) timerLabel.textContent = 'Almost time';
     if (remaining <= 0) {
       // Time's up: flush the un-answered current question then submit.
       var v = views[idx];

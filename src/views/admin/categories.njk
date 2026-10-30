@@ -5,16 +5,16 @@
 <div class="grid gap-6">
   <header class="flex flex-wrap items-end justify-between gap-4">
     <div class="grid gap-1">
-      <h1 class="font-heading text-2xl font-semibold text-ink">Manage categories</h1>
+      <h1 class="page-title font-heading text-2xl font-semibold text-ink">Manage categories</h1>
       <p class="text-sm text-muted">Question categories classify the bank and tag tutorials.</p>
     </div>
-    <a href="/admin/categories/new"><button type="button" class="{{ ui.buttonClass('primary', 'md') }}">New category</button></a>
+    <a href="/admin/categories/new" class="{{ ui.buttonClass('primary', 'md') }}">New category</a>
   </header>
 
   {% if notice %}<div class="mb-4">{{ forms.alert(notice, "ok") }}</div>{% endif %}
   {% if error %}<div class="mb-4">{{ forms.alert(error, "danger") }}</div>{% endif %}
 
-  <section class="overflow-x-auto rounded-lg border border-edge bg-surface p-2">
+  <section class="table-frame p-2" tabindex="0" aria-label="Scrollable records">
     <table class="w-full min-w-[32rem] border-collapse text-sm">
       <thead>
         <tr class="text-left text-xs uppercase text-muted">
@@ -30,7 +30,7 @@
             <td class="px-3 py-2.5 text-ink">{{ c.name }}</td>
             <td class="px-3 py-2.5">
               <div class="flex items-center justify-end gap-2">
-                <a href="/admin/categories/{{ c.slug }}/edit"><button type="button" class="{{ ui.buttonClass('secondary', 'sm') }}">Edit</button></a>
+                <a href="/admin/categories/{{ c.slug }}/edit" class="{{ ui.buttonClass('secondary', 'sm') }}">Edit</a>
                 <form method="post" action="/admin/categories/{{ c.slug }}/delete"
                   onsubmit="return confirm('Delete {{ c.name | e }}? This fails if it is still in use.');">
                   <button type="submit" class="{{ ui.buttonClass('danger', 'sm') }}">Delete</button>

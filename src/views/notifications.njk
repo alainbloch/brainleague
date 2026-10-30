@@ -1,10 +1,12 @@
 {% extends "layouts/base.njk" %}
+{% from "components/page.njk" import heading, empty %}
+{% from "components/home-graphics.njk" import graphic %}
 {% import "components/forms.njk" as forms %}
 
 {% block content %}
 <div class="grid gap-6">
   <header class="flex flex-wrap items-end justify-between gap-4">
-    <h1 class="font-heading text-2xl font-semibold text-ink">Notifications</h1>
+    <h1 class="page-title font-heading text-2xl font-semibold text-ink">Notifications</h1>
     {% if notifications.length %}
       <form method="post" action="/notifications/read">
         <button type="submit" class="{{ ui.buttonClass('secondary', 'sm') }}">Mark all as read</button>
@@ -13,21 +15,19 @@
   </header>
 
   {% if notifications.length === 0 %}
-    <section class="{{ ui.cardClass }}">
-      <p class="text-sm text-muted">You have no notifications yet.</p>
-    </section>
+    {{ empty('All caught up', 'Friend requests and new scores will appear here. In the meantime, find your next challenge.', '/tests', 'Explore challenges', 'podium') }}
   {% else %}
     <ul class="grid gap-3">
       {% for item in notifications %}
-        <li class="flex items-start gap-3 rounded-lg border border-edge bg-surface p-4 {{ 'opacity-70' if item.readAt else '' }}">
+        <li class="{{ ui.cardClass }} notification-item flex items-start gap-3 {{ 'opacity-70' if item.readAt else '' }}">
           {% if item.type === 'friend-request' %}
-            <span class="mt-0.5 text-info">{{ '🔔' }}</span>
+            <span class="notification-icon">{{ ui.icon("bell", { size: 20 }) }}</span>
           {% elif item.type === 'friend-accepted' %}
-            <span class="mt-0.5 text-ok">{{ '✅' }}</span>
+            <span class="notification-icon">{{ ui.icon("bell", { size: 20 }) }}</span>
           {% elif item.type === 'friend-score' %}
-            <span class="mt-0.5 text-info">{{ '🏆' }}</span>
+            <span class="notification-icon">{{ ui.icon("bell", { size: 20 }) }}</span>
           {% else %}
-            <span class="mt-0.5 text-muted">{{ 'ℹ️' }}</span>
+            <span class="notification-icon">{{ ui.icon("bell", { size: 20 }) }}</span>
           {% endif %}
           <div class="min-w-0 grid gap-0.5 text-sm">
             {% if item.type === 'friend-request' %}
