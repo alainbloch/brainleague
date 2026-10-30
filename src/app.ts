@@ -94,6 +94,7 @@ export async function buildApp({
   const adminController = new AdminController({ admin: appContainer.services.admin });
   const quizzesController = new QuizzesController({
     quizzes: appContainer.services.quizzes,
+    leaderboards: appContainer.services.leaderboards,
   });
   const leaderboardController = new LeaderboardController({
     leaderboard: appContainer.services.leaderboards,

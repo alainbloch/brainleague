@@ -6,6 +6,11 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+interface QuizzesControllerOptions {
+  quizzes: ContainerServices['quizzes'];
+  leaderboards: ContainerServices['leaderboards'];
+}
+
 /**
  * Thin HTTP layer for the test-taking flow: a catalog of practice tests, a
  * server-timed take page, the submit endpoint that hands answers to the quiz
@@ -15,9 +20,11 @@ function errorMessage(error: unknown): string {
  */
 export class QuizzesController {
   quizzes: ContainerServices['quizzes'];
+  leaderboards: ContainerServices['leaderboards'];
 
-  constructor({ quizzes }: { quizzes: ContainerServices['quizzes'] }) {
+  constructor({ quizzes, leaderboards }: QuizzesControllerOptions) {
     this.quizzes = quizzes;
+    this.leaderboards = leaderboards;
   }
 
   /** Catalog of available practice test types. */
@@ -58,7 +65,7 @@ export class QuizzesController {
     }
   }
 
-  /** Accept recorded answers, grade via the engine, and land on the report. */
+  /** Accept recorded answers, grade via the engine, notify friends, and land on the report. */
   async submitTest(request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
     const params = request.params as { attemptId?: string };
     const body = (request.body || {}) as { answers?: unknown };
@@ -71,7 +78,10 @@ export class QuizzesController {
     }
 
     try {
-      this.quizzes.submit(params.attemptId!, request.user!.id, answers);
+      const actorId = request.user!.id;
+      const result = this.quizzes.submit(params.attemptId!, actorId, answers);
+      // Fan out a friend-score notification to the actor's accepted friends.
+      await this.leaderboards.notifyFriendScore(result.attempt, result, actorId);
       return reply.redirect(`/tests/${params.attemptId}/result`);
     } catch (error) {
       return this.showCatalog(request, reply, { error: errorMessage(error) });
