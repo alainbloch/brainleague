@@ -1,29 +1,28 @@
 {% extends "layouts/base.njk" %}
 {% from "components/home-graphics.njk" import graphic, hero %}
 
+{% block bodyClass %}home-page{% endblock %}
+
 {% block content %}
 <div class="grid max-w-5xl mx-auto">
   {# Hero pairs the pitch with the supplied BrainLeague emblem. #}
   <section class="home-hero border-b border-edge py-20 sm:py-28">
     <div class="home-hero-copy">
-      <p class="mb-4 text-sm font-medium tracking-tight text-muted">Brain League · friends competing on timed brain tests</p>
+      <p class="mb-4 text-sm font-medium tracking-tight text-muted">A little brain boost. A lot of friendly competition.</p>
       <h1 class="max-w-3xl font-heading text-5xl font-medium leading-[1.05] tracking-[-0.03em] text-ink sm:text-6xl">
-        Who is the quickest mind in your crew?
+        Big brain energy.
+        Everyone’s invited.
       </h1>
       <p class="mt-6 max-w-xl text-base leading-relaxed text-muted">
-        Answer as many questions as you can before the clock runs out, then see how you
-        stack up against your friends. Real format, real pace — quick thinking and knowing
-        the question types beat grinding. Take a round, get your score, one-up your crew.
+        Give your brain a little playtime. Try a timed challenge, pick up a new trick,
+        and see how you stack up with friends. Chase your personal best or some
+        friendly bragging rights — every round is a fresh start.
       </p>
-      <div class="mt-10 flex flex-wrap items-center gap-3">
+      <div class="mt-10 flex flex-wrap items-center gap-4">
         {% if tests.length %}
-          <a href="/tests/{{ tests[0].slug }}/take">
-            <button type="button" class="{{ ui.buttonClass('primary', 'md') }} px-6">Take the {{ tests[0].name }} →</button>
-          </a>
+          <a href="/tests/{{ tests[0].slug }}/take" class="{{ ui.buttonClass('primary', 'md') }} home-cta">Let’s play <span aria-hidden="true">→</span></a>
         {% endif %}
-        <a href="/tests">
-          <button type="button" class="{{ ui.buttonClass('secondary', 'md') }} px-6">Browse all tests</button>
-        </a>
+        <a href="/tests" class="{{ ui.buttonClass('secondary' if tests.length else 'primary', 'md') }} home-cta">Explore the challenges</a>
       </div>
     </div>
     {{ hero() }}
@@ -32,9 +31,9 @@
   {# Feature sections — editorial numbered blocks. #}
   <section class="grid gap-14 py-16 sm:py-20">
     {% for f in [
-      { num: '01', graphic: 'timer', title: 'Built for timed tests, made for rivalry', body: 'Practice at the real pace so the clock feels familiar. Then put your score on the leaderboard and see exactly who beats who — your friends, your rivals, everyone.' },
-      { num: '02', graphic: 'patterns', title: 'Learn the question types on sight', body: 'Analogies, word problems, number series and more. Tease apart how each one works, so you recognize them fast and let go the moment you are stuck.' },
-      { num: '03', graphic: 'podium', title: 'Compete, track, and improve together', body: 'Friend leaderboards and score alerts turn solo prep into a running battle. Watch your rank climb as you one-up the people you know.' }
+      { num: '01', graphic: 'timer', title: 'Ready, set, brain!', body: 'Race the clock, surprise yourself, and make each round your own. A little practice helps the pace feel familiar — and a new personal best always feels good.' },
+      { num: '02', graphic: 'patterns', title: 'Aha! moments start here', body: 'Word puzzles, number patterns, and those delightfully tricky logic questions. Explore tips and worked examples, learn a handy shortcut, and bring it into your next round.' },
+      { num: '03', graphic: 'podium', title: 'Better with a little company', body: 'Bring your friends along, cheer on their wins, and give them a score to chase. Follow your progress on the leaderboards and keep the friendly competition going.' }
     ] %}
       <div class="grid gap-6 sm:grid-cols-12 sm:gap-10">
         <div class="home-feature-art sm:col-span-3">
@@ -53,15 +52,15 @@
   <section class="border-t border-edge py-16 sm:py-20">
     <div class="grid gap-6 sm:grid-cols-12 sm:gap-10">
       <div class="home-feature-art sm:col-span-3">
-        <p class="text-sm font-medium tracking-tight text-muted">Available</p>
+        <p class="text-sm font-medium tracking-tight text-muted">Your next challenge</p>
         {{ graphic("tests") }}
       </div>
       <div class="sm:col-span-8">
         <h2 class="font-heading text-2xl font-medium tracking-[-0.02em] text-ink sm:text-3xl">
-          Pick a brain test and go head-to-head
+          Find your next “I’ve got this”
         </h2>
         {% if not tests.length %}
-          <p class="mt-8 max-w-xl text-sm text-muted">No practice tests are available yet — check back soon.</p>
+          <p class="mt-8 max-w-xl text-sm text-muted">The next challenges are warming up! Check back soon, or explore Tips & tutorials while you wait.</p>
         {% else %}
           <div class="mt-8 grid gap-6 sm:grid-cols-2">
             {% for test in tests %}
@@ -78,9 +77,7 @@
                   </div>
                 </div>
                 <div class="mt-auto flex flex-col gap-2">
-                  <a href="/tests/{{ test.slug }}/take" class="w-full">
-                    <button type="button" class="{{ ui.buttonClass('primary', 'md') }} w-full py-2">Start {{ test.name }} →</button>
-                  </a>
+                  <a href="/tests/{{ test.slug }}/take" class="{{ ui.buttonClass('primary', 'md') }} home-cta w-full" aria-label="Play {{ test.name }}">Play this challenge <span aria-hidden="true">→</span></a>
                   <a href="/tests/{{ test.slug }}/leaderboard" class="text-center text-sm font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline">See the leaderboard</a>
                 </div>
               </article>
@@ -100,11 +97,11 @@
       <div class="sm:col-span-8 grid gap-px overflow-hidden border border-edge bg-edge sm:grid-cols-2">
         <a href="/leaderboards" class="group grid bg-surface p-6 hover:bg-fill">
           <h3 class="font-heading text-lg font-medium text-ink group-hover:underline">Leaderboards</h3>
-          <p class="mt-1 text-sm text-muted">See where everyone ranks, global and friends.</p>
+          <p class="mt-1 text-sm text-muted">Find your friends. Celebrate a personal best. See who’s on a roll.</p>
         </a>
         <a href="/tutorials" class="group grid bg-surface p-6 hover:bg-fill">
           <h3 class="font-heading text-lg font-medium text-ink group-hover:underline">Tips & tutorials</h3>
-          <p class="mt-1 text-sm text-muted">Ace each question type on sight.</p>
+          <p class="mt-1 text-sm text-muted">Stuck on a tricky one? Let’s work through it together.</p>
         </a>
       </div>
     </div>
