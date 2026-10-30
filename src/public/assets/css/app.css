@@ -282,3 +282,62 @@
     gap: 1.5rem;
   }
 }
+
+/* Larger, tactile homepage actions; other screens keep their compact controls. */
+.home-cta,
+.home-page header a[href='/register'] > button {
+  min-height: 56px;
+  padding: 0.9rem 1.5rem;
+  border-radius: 16px;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 650;
+  text-align: center;
+  white-space: normal;
+  box-shadow:
+    0 5px 0 color-mix(in srgb, var(--brand-navy) 18%, transparent),
+    0 10px 22px color-mix(in srgb, var(--brand-navy) 14%, transparent);
+  transition:
+    background-color 150ms,
+    box-shadow 150ms,
+    transform 150ms;
+}
+
+@media (hover: hover) {
+  .home-cta:hover,
+  .home-page header a[href='/register']:hover > button {
+    transform: translateY(-2px);
+    box-shadow:
+      0 7px 0 color-mix(in srgb, var(--brand-navy) 18%, transparent),
+      0 14px 26px color-mix(in srgb, var(--brand-navy) 18%, transparent);
+  }
+}
+
+.home-cta:active,
+.home-page header a[href='/register']:active > button {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--brand-navy) 18%, transparent);
+}
+
+@media (max-width: 639px) {
+  .home-hero-copy .home-cta {
+    width: 100%;
+  }
+  .home-page header a[href='/register'] > button {
+    min-height: 48px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-cta,
+  .home-cta:hover,
+  .home-cta:active,
+  .home-page header a[href='/register'] > button,
+  .home-page header a[href='/register']:hover > button,
+  .home-page header a[href='/register']:active > button {
+    transition: none;
+    transform: none;
+  }
+}
