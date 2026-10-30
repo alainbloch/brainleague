@@ -1,0 +1,66 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl grid gap-6">
+  <header class="grid gap-1">
+    <h1 class="font-heading text-2xl font-semibold text-ink">New question</h1>
+    <p class="text-sm text-muted">Add a multiple-choice question to the bank.</p>
+  </header>
+
+  {% if error %}<div class="mb-4">{{ forms.alert(error, "danger") }}</div>{% endif %}
+
+  <section class="{{ ui.cardClass }}">
+    <form method="post" action="/admin/questions" class="grid gap-4"
+      onsubmit="return document.querySelectorAll('[name=choices]').length >= 2;">
+      {{ forms.field("prompt", "Prompt", { as: "textarea", rows: 3, value: values.prompt, required: true }) }}
+
+      <fieldset class="grid gap-2">
+        <legend class="text-sm font-medium text-ink">Choices</legend>
+        {% set choices = values.choices is iterable ? values.choices : [values.choices] %}
+        {% for i in range(0, 3) %}
+          <label class="flex items-center gap-2 text-sm text-ink-soft">
+            <span class="w-6 font-mono text-muted">{{ loop.index }}.</span>
+            <input type="text" name="choices" class="{{ ui.inputClass }}"
+              value="{{ choices[i] | default('') }}" placeholder="Choice {{ loop.index }}"
+              data-choice-index="{{ loop.index0 }}" />
+            <input type="radio" name="correctIndex" value="{{ loop.index0 }}"
+              {% if values.correctIndex === loop.index0 or (loop.index0 === 0 and values.correctIndex === undefined) %}checked{% endif %}
+              aria-label="Mark as correct" />
+          </label>
+        {% endfor %}
+        <p class="text-xs text-muted">Mark the radio next to the correct answer. Add at least two non-empty choices.</p>
+      </fieldset>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label class="grid gap-1 text-sm">
+          <span class="text-ink-soft">Test type</span>
+          <select id="testTypeId" name="testTypeId" class="{{ ui.inputClass }}" required>
+            <option value="" disabled {% if not values.testTypeId %}selected{% endif %}>Choose a test…</option>
+            {% for t in tests %}
+              <option value="{{ t.id }}" {% if values.testTypeId === t.id %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-ink-soft">Category</span>
+          <select id="categorySlug" name="categorySlug" class="{{ ui.inputClass }}" required>
+            <option value="" disabled {% if not values.categorySlug %}selected{% endif %}>Choose a category…</option>
+            {% for c in categories %}
+              <option value="{{ c.slug }}" {% if values.categorySlug === c.slug %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+
+      {{ forms.field("estSeconds", "Expected solve time (seconds)", { type: "number", step: "any", value: values.estSeconds, required: true, hint: "Used to order questions easier-to-harder." }) }}
+      {{ forms.field("explanation", "Explanation", { as: "textarea", rows: 2, value: values.explanation, hint: "Shown after the result / in tutorials." }) }}
+
+      <div class="flex items-center justify-between">
+        <a href="/admin/questions" class="text-sm text-ink-soft underline-offset-4 hover:underline">← Back to questions</a>
+        <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Create question</button>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}
