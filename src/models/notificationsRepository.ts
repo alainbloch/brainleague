@@ -6,7 +6,11 @@ import type Database from 'better-sqlite3';
  * JSON payload, read-state, and per-user listing. The payload shape is free so
  * new notification types don't require a migration.
  */
-export type NotificationType = 'friend-request' | 'friend-accepted' | 'system';
+export type NotificationType =
+  | 'friend-request'
+  | 'friend-accepted'
+  | 'system'
+  | 'friend-score';
 
 export interface Notification {
   id: string;

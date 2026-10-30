@@ -21,6 +21,7 @@ import { NotificationService } from './services/notificationService.js';
 import { DirectoryService } from './services/directoryService.js';
 import { AdminService } from './services/adminService.js';
 import { QuizEngine } from './services/quizEngine.js';
+import { LeaderboardService } from './services/leaderboardService.js';
 
 export interface ContainerServices {
   sessions: SessionService;
@@ -34,6 +35,7 @@ export interface ContainerServices {
   directory: DirectoryService;
   admin: AdminService;
   quizzes: QuizEngine;
+  leaderboards: LeaderboardService;
 }
 
 export interface Container {
@@ -173,6 +175,14 @@ export function buildContainer({
     clock,
   });
   const quizzes = new QuizEngine({ testsRepo, questionsRepo, attemptsRepo, clock });
+  const leaderboards = new LeaderboardService({
+    attemptsRepo,
+    friendshipsRepo,
+    usersRepo,
+    testsRepo,
+    notifications,
+    clock,
+  });
 
   return {
     db,
@@ -201,6 +211,7 @@ export function buildContainer({
       directory,
       admin,
       quizzes,
+      leaderboards,
     },
     close() {
       closeDatabase(db);

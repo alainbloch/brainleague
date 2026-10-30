@@ -15,6 +15,7 @@ import { UsersController } from './controllers/usersController.js';
 import { NotificationsController } from './controllers/notificationsController.js';
 import { AdminController } from './controllers/adminController.js';
 import { QuizzesController } from './controllers/quizzesController.js';
+import { LeaderboardController } from './controllers/leaderboardController.js';
 import { resolveUser, requireAuth, requireAdmin } from './middleware/auth.js';
 import { registerRoutes } from './routes.js';
 import { registerMcpRoutes } from './mcp/http.js';
@@ -92,6 +93,10 @@ export async function buildApp({
   const quizzesController = new QuizzesController({
     quizzes: appContainer.services.quizzes,
   });
+  const leaderboardController = new LeaderboardController({
+    leaderboard: appContainer.services.leaderboards,
+    testsRepo: appContainer.repos.tests,
+  });
   await registerRoutes(fastify, {
     authController,
     pageController,
@@ -100,6 +105,7 @@ export async function buildApp({
     notificationsController,
     adminController,
     quizzesController,
+    leaderboardController,
     authMiddleware: requireAuth(appContainer.services.identity),
     adminMiddleware: requireAdmin(appContainer.services.identity),
   });
