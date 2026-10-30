@@ -2,10 +2,10 @@
 
 {% block content %}
 <div class="quiz-shell grid gap-6">
-  <header class="grid gap-3">
-    <div class="flex items-center justify-between gap-3">
+  <header class="quiz-status grid gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 class="font-heading text-xl font-semibold text-ink">Your brain workout</h1>
+        <h1 class="page-title font-heading text-xl font-semibold text-ink">Your brain workout</h1>
         <p id="quiz-progress-label" class="text-sm text-muted" aria-live="polite">Question <span id="progress-current">1</span> of {{ questions.length }}</p>
       </div>
       <div class="quiz-clock text-right">
@@ -13,7 +13,7 @@
         <span id="timer" class="text-xl font-semibold text-ink tabular-nums" role="timer">--:--</span>
       </div>
     </div>
-    <progress id="quiz-progress" max="{{ questions.length }}" value="0" aria-label="Questions completed"></progress>
+    <progress id="quiz-progress" class="quiz-progress" max="{{ questions.length }}" value="0" aria-label="Questions completed"></progress>
     <p class="text-sm text-muted">Select an answer, then choose Next. Use keys <strong>1–4</strong> to select and <strong>Enter</strong> to continue. You cannot go back.</p>
   </header>
 

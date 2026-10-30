@@ -4,7 +4,7 @@
 {% block content %}
 <div class="mx-auto max-w-2xl grid gap-6">
   <header class="grid gap-1">
-    <h1 class="font-heading text-2xl font-semibold text-ink">New test</h1>
+    <h1 class="page-title font-heading text-2xl font-semibold text-ink">New test</h1>
     <p class="text-sm text-muted">Add a timed practice test to the catalog.</p>
   </header>
 
@@ -21,7 +21,7 @@
         <input type="checkbox" name="noGoingBack" value="1" {% if values.noGoingBack %}checked{% endif %} class="size-4" />
         No going back (candidate cannot revisit questions)
       </label>
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <a href="/admin/tests" class="text-sm text-ink-soft underline-offset-4 hover:underline">← Back to tests</a>
         <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Create test</button>
       </div>

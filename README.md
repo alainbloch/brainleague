@@ -389,6 +389,19 @@ original; admin-edited tutorials and existing questions remain untouched. No
 users, scores, or attempts are deleted. The current engine presents a test's
 entire bank, so keep each bank's size aligned with its advertised question count.
 
+### Shared page styling
+
+`src/ui/classes.ts` owns shared control/card classes. Interior layout, table,
+quiz, and lesson styles live in `src/public/assets/css/design-system.css`, imported
+by `app.css`. `components/page.njk` provides reusable illustrated headings and
+empty states. Keep navigation actions compact; use prominent actions for the
+main task. Rebuild the served CSS after editing styles or template classes.
+
+Tutorials remain plain text: `src/ui/tutorialSections.ts` recognizes standalone
+WORKED EXAMPLE, QUICK TIP, COMMON TRAP, TRY IT, and CHECK YOUR ANSWER headings.
+The template escapes every section and uses native details for answer reveals.
+Unrecognized text is preserved, never interpreted as HTML.
+
 ### Quiz presentation and coaching
 
 The take screen uses large answer cards. Click a card or press **1–4** to select;

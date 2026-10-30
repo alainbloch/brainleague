@@ -123,7 +123,7 @@ test('submit grades answers and redirects to the result report', async () => {
   assert.match(result.text, /Question review/);
   // 1 correct, 2 reached -> every state shows up in the replay.
   assert.match(result.text, /Correct/);
-  assert.match(result.text, /Wrong/);
+  assert.match(result.text, /Incorrect/);
   assert.match(result.text, /Skipped/);
 
   // The graded attempt is persisted as submitted, not in_progress.

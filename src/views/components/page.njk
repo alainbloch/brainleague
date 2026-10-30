@@ -1,0 +1,16 @@
+{% from "components/home-graphics.njk" import graphic %}
+{% macro heading(title, description, kind='patterns') %}
+<header class="page-heading">
+  {{ graphic(kind) }}
+  <div><h1 class="page-title font-heading font-semibold">{{ title }}</h1>
+  {% if description %}<p class="page-description">{{ description }}</p>{% endif %}</div>
+</header>
+{% endmacro %}
+{% macro empty(title, description, href, action, kind='patterns') %}
+<section class="{{ ui.cardClass }} empty-state">
+  {{ graphic(kind) }}
+  <h2 class="text-lg font-semibold">{{ title }}</h2>
+  <p>{{ description }}</p>
+  {% if href %}<a href="{{ href }}" class="{{ ui.buttonClass('primary', 'md') }}">{{ action }}</a>{% endif %}
+</section>
+{% endmacro %}

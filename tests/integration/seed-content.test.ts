@@ -187,7 +187,7 @@ test('all shipped tests can be taken, graded and reviewed without exposing answe
       const html = app.getDecorator<Environment>('viewEngine').render('tutorial.njk', {
         tutorial: { ...tutorial, categorySlug: tutorial.category },
       });
-      assert.match(html, /CHECK YOUR ANSWER/);
+      assert.match(html, /<summary>Check your answer<\/summary>/);
       assert.match(html, /Try a practice test/);
     }
   } finally {

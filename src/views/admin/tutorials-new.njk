@@ -4,7 +4,7 @@
 {% block content %}
 <div class="mx-auto max-w-3xl grid gap-6">
   <header class="grid gap-1">
-    <h1 class="font-heading text-2xl font-semibold text-ink">New tutorial</h1>
+    <h1 class="page-title font-heading text-2xl font-semibold text-ink">New tutorial</h1>
     <p class="text-sm text-muted">Tip / how-to for a question category, linked from result reports.</p>
   </header>
 
@@ -25,7 +25,7 @@
       {{ forms.field("title", "Title", { value: values.title, required: true }) }}
       {{ forms.field("body", "Body", { as: "textarea", rows: 8, value: values.body, required: true, hint: "Markdown or plain text." }) }}
       {{ forms.field("sortOrder", "Sort order", { type: "number", value: values.sortOrder, hint: "Lower sorts first." }) }}
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <a href="/admin/tutorials" class="text-sm text-ink-soft underline-offset-4 hover:underline">← Back to tutorials</a>
         <button type="submit" class="{{ ui.buttonClass('primary', 'md') }}">Create tutorial</button>
       </div>

@@ -8,6 +8,7 @@
     data-accent  red (default) | gold | white ...  the one accent colour
 */
 @import 'tailwindcss';
+@import './design-system.css';
 
 @theme inline {
   --color-canvas: var(--canvas);

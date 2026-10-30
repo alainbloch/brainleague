@@ -6,9 +6,9 @@
 {% set skipFlagged = report.questions | selectattr('shouldHaveSkipped') | list %}
 
 {% block content %}
-<div class="grid gap-6">
+<div class="page-stack">
   <div>
-    <h1 class="font-heading text-2xl font-semibold text-ink">{{ report.test.name }}</h1>
+    <h1 class="page-title font-heading text-2xl font-semibold text-ink">{{ report.test.name }}</h1>
     <p class="text-sm text-muted">by {{ report.test.publisher }}</p>
   </div>
 
@@ -17,22 +17,22 @@
   {% endif %}
 
   {# Summary highlights #}
-  <section class="{{ ui.cardClass }}">
+  <section class="{{ ui.cardClass }} result-summary">
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      <div>
+      <div class="result-stat">
         <p class="text-xs text-muted">Correct</p>
         <p class="font-heading text-2xl font-semibold text-ok">{{ report.correctCount }}<span class="text-sm text-muted font-normal"> / {{ report.questionCount }}</span></p>
       </div>
-      <div>
+      <div class="result-stat">
         <p class="text-xs text-muted">Reached</p>
         <p class="font-heading text-2xl font-semibold text-ink">{{ report.reachedCount }}<span class="text-sm text-muted font-normal"> / {{ total }}</span></p>
       </div>
-      <div>
+      <div class="result-stat">
         <p class="text-xs text-muted">Accuracy</p>
         <p class="font-heading text-2xl font-semibold text-ink">{{ accuracy }}%</p>
         <p class="text-xs text-muted">of answered questions</p>
       </div>
-      <div>
+      <div class="result-stat">
         <p class="text-xs text-muted">Avg per question</p>
         <p class="font-heading text-2xl font-semibold text-ink">{{ avgSecondsPerQuestion | round(1) }}s</p>
         <p class="text-xs text-muted">across reached questions</p>
@@ -53,7 +53,7 @@
       <div class="grid gap-3">
         {% for q in skipFlagged %}
           <div class="rounded-md border border-edge bg-fill p-4">
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex flex-wrap items-start justify-between gap-4">
               <p class="text-sm font-medium text-ink">Q{{ q.index + 1 }} · {{ q.visual.prompt if q.visual else q.prompt }}</p>
               <span class="shrink-0 {{ ui.badgeClass('warn') }}">{{ (q.timeMs / 1000) | round(1) }}s spent</span>
             </div>
@@ -71,7 +71,7 @@
     <ol class="grid gap-3">
       {% for q in report.questions %}
         {% set qNum = loop.index %}
-        <li class="rounded-md border border-edge p-4">
+        <li class="review-item">
           <div class="flex flex-wrap items-start justify-between gap-2">
             <p class="text-sm font-medium text-ink">Q{{ q.index + 1 }} · <a href="/tutorials?category={{ q.categorySlug }}" class="text-accent underline-offset-4 hover:underline">{{ q.categorySlug | replace('-', ' ') }}</a></p>
             <div class="flex items-center gap-2">
@@ -82,7 +82,7 @@
               {% elif q.chosenIndex == q.correctIndex %}
                 <span class="{{ ui.badgeClass('warn') }}">Not credited</span>
               {% else %}
-                <span class="{{ ui.badgeClass('danger') }}">Wrong</span>
+                <span class="{{ ui.badgeClass('danger') }}">Incorrect</span>
               {% endif %}
               <span class="text-xs text-muted tabular-nums">{{ (q.timeMs / 1000) | round(1) }}s</span>
             </div>
@@ -107,7 +107,7 @@
             {% endfor %}
           </ul>
           {% if q.explanation %}
-            <p class="mt-2 text-sm text-ink-soft"><strong>Why:</strong> {{ q.explanation }}</p>
+            <p class="review-explanation mt-4 text-sm"><strong>Why:</strong> {{ q.explanation }}</p>
           {% endif %}
           <p class="mt-2 text-xs text-muted">Expected ~{{ q.estSeconds }}s</p>
         </li>
@@ -116,7 +116,7 @@
   </section>
 
   <div>
-    <a href="/tests"><button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Back to tests</button></a>
+    <a href="/tests" class="{{ ui.buttonClass('primary', 'md') }}">Back to tests</a>
   </div>
 </div>
 {% endblock %}

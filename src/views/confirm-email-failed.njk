@@ -7,7 +7,7 @@
     <h2 class="font-heading text-base font-semibold mb-4">Email change not confirmed</h2>
     <div class="mb-4">{{ forms.alert(error, "danger") }}</div>
     <p class="text-sm text-muted mb-6">Request a new confirmation link from your account settings.</p>
-    <a href="/login"><button type="button" class="{{ ui.buttonClass('primary', 'sm') }}">Sign in</button></a>
+    <a href="/login" class="{{ ui.buttonClass('primary', 'sm') }}">Sign in</a>
   </section>
 </div>
 {% endblock %}
