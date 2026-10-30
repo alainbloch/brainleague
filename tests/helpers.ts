@@ -64,9 +64,11 @@ export type TestContainer = Container & {
 
 export function createTestContainer({
   clock,
+  mailTransport = 'smtp',
   avatarStorage = createAvatarStub(),
 }: {
   clock?: () => number;
+  mailTransport?: string;
   avatarStorage?: AvatarStorage | AvatarStub | null;
 } = {}): {
   container: TestContainer;
@@ -82,6 +84,11 @@ export function createTestContainer({
       ...(avatarStorage ? { avatarStorage } : {}),
     },
   }) as TestContainer;
+  // Most fixtures exercise delivered-email verification with the spy transport.
+  container.services.identity.config = {
+    ...container.services.identity.config,
+    mail: { transport: mailTransport },
+  };
   container.mailer = mailer;
   container.avatarStorage = avatarStorage;
   return { container, mailer, avatarStorage };

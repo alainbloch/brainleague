@@ -423,3 +423,12 @@ npm run test:browser
 The browser checks cover selection, keyboard confirmation, repeated keys, skips,
 autosave, timeout, one-time submission, and 320px/390px/desktop layouts. An existing
 Chromium installation can be selected with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+
+### Console email and account verification
+
+With `MAIL_TRANSPORT=console`, new registrations are automatically verified and
+can sign in immediately. Existing unverified accounts are verified after a
+successful password login; no database migration or reseeding is necessary.
+Other transports retain email-link verification. Console mode does not prove
+ownership of the email address. Password-reset and email-change links still
+require their tokens and are logged to the server console.

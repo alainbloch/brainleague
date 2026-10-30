@@ -72,6 +72,7 @@ before(async () => {
     env: {
       ...process.env,
       NODE_ENV: 'test',
+      MAIL_TRANSPORT: 'console',
       PORT: String(PORT),
       APP_URL,
       DATABASE_PATH: path.join(tmpDir, 'app.db'),
@@ -111,24 +112,23 @@ test('health, assets and public pages work', async () => {
   assert.match(await index.text(), /Brain League/);
 });
 
-test('register → verify → sign in → protected page → logout', async () => {
+test('console register → sign in → protected page → logout', async () => {
   // Register
   const reg = await http(`${APP_URL}/register`, {
     method: 'POST',
     form: { name: 'E2E', email: EMAIL, password: 'Correct-Horse-42!' },
   });
   assert.equal(reg.status, 200);
-  assert.match(await reg.text(), /verification email has been sent/);
+  assert.match(await reg.text(), /Email confirmation is not required/);
+  assert.equal(magicLink('verify'), null, 'no verification link needed in console mode');
 
-  // Magic link arrives via the console mail transport.
-  const verifyUrl = await waitFor(() => magicLink('verify'));
-  assert.ok(verifyUrl, `verification link logged:\n${stdout}`);
-
-  // Verify → redirected to /account with a session cookie.
-  const verified = await http(verifyUrl);
-  assert.equal(verified.status, 302);
-  const cookie = sessionCookie(verified);
-  assert.ok(cookie.startsWith('usertest_session'), 'session cookie set after verify');
+  const login = await http(`${APP_URL}/login`, {
+    method: 'POST',
+    form: { email: EMAIL, password: 'Correct-Horse-42!' },
+  });
+  assert.equal(login.status, 302);
+  const cookie = sessionCookie(login);
+  assert.ok(cookie.startsWith('usertest_session'), 'session cookie set after login');
 
   // Protected page accessible with the cookie.
   const account = await http(`${APP_URL}/account`, { cookie });
