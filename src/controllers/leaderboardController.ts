@@ -13,8 +13,9 @@ function pageQuery(request: FastifyRequest): number {
 }
 
 /**
- * Leaderboard pages (global + friends tabs). Thin HTTP layer: resolves the
- * test from the route slug and delegates ranking to the leaderboard service.
+ * Leaderboard pages: an index of every test's leaderboard (global + friends)
+ * and the per-test global/friends tabs. Thin HTTP layer: resolves the test from
+ * the route slug and delegates ranking to the leaderboard service.
  */
 export class LeaderboardController {
   leaderboard: LeaderboardService;
@@ -23,6 +24,15 @@ export class LeaderboardController {
   constructor({ leaderboard, testsRepo }: LeaderboardControllerOptions) {
     this.leaderboard = leaderboard;
     this.tests = testsRepo;
+  }
+
+  /** Index page listing every test's global + friends leaderboard links. */
+  showIndex(request: FastifyRequest, reply: FastifyReply): FastifyReply {
+    return reply.view('leaderboards', {
+      pageTitle: 'Leaderboards',
+      user: request.user,
+      tests: this.tests.list(),
+    });
   }
 
   showGlobal(request: FastifyRequest, reply: FastifyReply): FastifyReply {

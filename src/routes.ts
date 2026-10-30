@@ -188,7 +188,12 @@ export async function registerRoutes(
     quizzesController.showResult.bind(quizzesController),
   );
 
-  // Leaderboards (per-test global + friends)
+  // Leaderboards index + per-test global and friends
+  app.get(
+    '/leaderboards',
+    { preHandler: authMiddleware },
+    leaderboardController.showIndex.bind(leaderboardController),
+  );
   app.get(
     '/tests/:slug/leaderboard',
     { preHandler: authMiddleware },

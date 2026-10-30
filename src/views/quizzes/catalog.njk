@@ -39,9 +39,17 @@
               <dd class="font-medium text-ink">{{ (test.durationSeconds / 60) | round(0, 'floor') }} min</dd>
             </div>
           </dl>
-          <a href="/tests/{{ test.slug }}/take" class="mt-5 inline-block">
-            <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Start test</button>
-          </a>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <a href="/tests/{{ test.slug }}/take">
+              <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Start test</button>
+            </a>
+            <a href="/tests/{{ test.slug }}/leaderboard">
+              <button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Leaderboard</button>
+            </a>
+            <a href="/tests/{{ test.slug }}/leaderboard/friends">
+              <button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Friends</button>
+            </a>
+          </div>
         </section>
       {% endfor %}
     </div>

@@ -1,22 +1,86 @@
 {% extends "layouts/base.njk" %}
-{% import "components/forms.njk" as forms %}
 
 {% block content %}
-<div class="grid gap-6">
-  <section class="{{ ui.cardClass }}">
-    <h1 class="font-heading text-2xl font-semibold text-ink">Hello{% if user %}, {{ user.name }}{% endif %}.</h1>
-    <p class="mt-2 text-sm text-muted">
-      Welcome to Brain League.
+<div class="grid gap-10">
+  {# Hero -- model the pitch on timedprep.com: run out of time in practice, not on test day. #}
+  <section class="grid gap-4 text-center sm:text-left">
+    <p class="text-xs font-semibold uppercase tracking-widest text-accent">Timed practice for hiring tests</p>
+    <h1 class="font-heading text-4xl font-bold leading-tight text-ink sm:text-5xl">
+      Run out of time in practice,<br class="hidden sm:block" /> not on test day.
+    </h1>
+    <p class="mx-auto max-w-xl text-sm leading-relaxed text-muted sm:mx-0">
+      The Wonderlic and PI give you ~14 seconds a question; the CCAT gives you 18.
+      Fewer than 1% of candidates finish. Brain League helps you build the two habits
+      that actually move your score: recognizing question types on sight, and letting
+      go the moment you're stuck. Take a free timed test now, then compete on the
+      leaderboard and train with friends.
     </p>
-    <div class="mt-6 flex flex-wrap gap-3">
-      {% if user %}
-        <a href="/account"><button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Go to account</button></a>
-        <a href="/logout"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Sign out</button></a>
-      {% else %}
-        <a href="/register"><button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Create account</button></a>
-        <a href="/login"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Sign in</button></a>
+    <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
+      {% if tests.length %}
+        <a href="/tests/{{ tests[0].slug }}/take">
+          <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Take the {{ tests[0].name }} →</button>
+        </a>
       {% endif %}
+      <a href="/tests">
+        <button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Browse all tests</button>
+      </a>
     </div>
+  </section>
+
+  {# Test catalog cards, modeled on timedprep's grid. #}
+  <section class="grid gap-4">
+    <h2 class="font-heading text-xl font-semibold text-ink">Which test were you invited to?</h2>
+    {% if not tests.length %}
+      <p class="text-sm text-muted">No practice tests are available yet. Check back soon.</p>
+    {% else %}
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% for test in tests %}
+          <section class="{{ ui.cardClass }}">
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <h3 class="font-heading text-lg font-semibold text-ink">{{ test.name }}</h3>
+                <p class="text-xs text-muted">by {{ test.publisher }}</p>
+              </div>
+              {% if test.noGoingBack %}
+                <span class="{{ ui.badgeClass('info') }}">No going back</span>
+              {% endif %}
+            </div>
+            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span class="block text-xs text-muted">Questions</span>
+                <span class="font-medium text-ink">{{ test.questionCount }}</span>
+              </div>
+              <div>
+                <span class="block text-xs text-muted">Time</span>
+                <span class="font-medium text-ink">{{ (test.durationSeconds / 60) | round(0, 'floor') }} min</span>
+              </div>
+            </dl>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <a href="/tests/{{ test.slug }}/take">
+                <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Take the test</button>
+              </a>
+              <a href="/tests/{{ test.slug }}/leaderboard">
+                <button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Leaderboard</button>
+              </a>
+            </div>
+          </section>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  {# How it works + value props. #}
+  <section class="grid gap-4 sm:grid-cols-3">
+    {% for feature in [
+      { title: "Built to run out of time", body: "Practice the real formats at the real pace, so the clock is familiar on test day." },
+      { title: "Know the question types", body: "Tips and tutorials on sight-recognizing analogies, word problems, figure series and more." },
+      { title: "Compete with friends", body: "Friend leaderboards and result alerts keep practice social and honest." }
+    ] %}
+      <section class="{{ ui.cardClass }}">
+        <h4 class="font-heading text-sm font-semibold text-ink">{{ feature.title }}</h4>
+        <p class="mt-1 text-sm text-muted">{{ feature.body }}</p>
+      </section>
+    {% endfor %}
   </section>
 </div>
 {% endblock %}

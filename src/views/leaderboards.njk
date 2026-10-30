@@ -1,0 +1,31 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+<div class="grid gap-6">
+  <header class="grid gap-1">
+    <h1 class="font-heading text-2xl font-semibold text-ink">Leaderboards</h1>
+    <p class="text-sm text-muted">Where you stack up against the world and against your friends, test by test.</p>
+  </header>
+
+  {% if not tests.length %}
+    <section class="{{ ui.cardClass }}">
+      <p class="text-sm text-muted">No tests yet — nothing to rank.</p>
+    </section>
+  {% else %}
+    <ul class="grid gap-3">
+      {% for test in tests %}
+        <li class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-edge bg-surface p-4">
+          <div class="min-w-0">
+            <h2 class="font-heading text-base font-semibold text-ink">{{ test.name }}</h2>
+            <p class="text-xs text-muted">{{ test.questionCount }} questions · {{ (test.durationSeconds / 60) | round(0, 'floor') }} min</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a href="/tests/{{ test.slug }}/leaderboard"><button type="button" class="{{ ui.buttonClass('primary', 'sm') }}">Global</button></a>
+            <a href="/tests/{{ test.slug }}/leaderboard/friends"><button type="button" class="{{ ui.buttonClass('secondary', 'sm') }}">Friends</button></a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+{% endblock %}

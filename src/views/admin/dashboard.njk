@@ -27,5 +27,16 @@
     <a href="/admin/broadcast"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Broadcast notification</button></a>
     <a href="/users"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Browse directory</button></a>
   </div>
+
+  <header class="mt-2 grid gap-1">
+    <h2 class="font-heading text-lg font-semibold text-ink">Content</h2>
+    <p class="text-sm text-muted">Manage the timed-test catalog and tutorials.</p>
+  </header>
+  <div class="flex flex-wrap gap-3">
+    <a href="/admin/tests"><button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Manage tests</button></a>
+    <a href="/admin/questions"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Manage questions</button></a>
+    <a href="/admin/categories"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Manage categories</button></a>
+    <a href="/admin/tutorials"><button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Manage tutorials</button></a>
+  </div>
 </div>
 {% endblock %}

@@ -79,7 +79,7 @@ export async function buildApp({
     services: appContainer.services,
     config: appContainer.config,
   });
-  const pageController = new PageController();
+  const pageController = new PageController({ testsRepo: appContainer.repos.tests });
   const settingsController = new SettingsController({
     services: appContainer.services,
     config: appContainer.config,
