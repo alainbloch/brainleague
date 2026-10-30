@@ -445,3 +445,7 @@ successful password login; no database migration or reseeding is necessary.
 Other transports retain email-link verification. Console mode does not prove
 ownership of the email address. Password-reset and email-change links still
 require their tokens and are logged to the server console.
+
+The public `/about` page explains BrainLeague’s value, getting-started flow, and
+founder story. It is rendered by `PageController.showAbout` and linked from the
+shared navigation for visitors and signed-in users.

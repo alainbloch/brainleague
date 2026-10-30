@@ -60,6 +60,7 @@ export async function registerRoutes(
 ): Promise<void> {
   // Public
   app.get('/', pageController.showHome.bind(pageController));
+  app.get('/about', pageController.showAbout.bind(pageController));
 
   // Auth pages
   app.get('/login', authController.showLogin.bind(authController));

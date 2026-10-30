@@ -16,6 +16,7 @@
           <img src="/assets/images/BrainLeague-wordmark.svg" alt="BrainLeague" class="h-5 w-auto" />
         </a>
         <nav class="flex flex-wrap items-center gap-3 text-sm">
+          <a href="/about" class="text-ink-soft hover:text-ink underline-offset-4 hover:underline"{% if pageTitle == "About BrainLeague" %} aria-current="page"{% endif %}>About</a>
           {% if user %}
             <a href="/tests" class="text-ink-soft hover:text-ink underline-offset-4 hover:underline">Tests</a>
             <a href="/leaderboards" class="text-ink-soft hover:text-ink underline-offset-4 hover:underline">Leaderboards</a>
