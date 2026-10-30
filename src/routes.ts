@@ -5,6 +5,7 @@ import type { SettingsController } from './controllers/settingsController.js';
 import type { UsersController } from './controllers/usersController.js';
 import type { NotificationsController } from './controllers/notificationsController.js';
 import type { AdminController } from './controllers/adminController.js';
+import type { QuizzesController } from './controllers/quizzesController.js';
 
 export interface RouteDependencies {
   authController: AuthController;
@@ -13,6 +14,7 @@ export interface RouteDependencies {
   usersController: UsersController;
   notificationsController: NotificationsController;
   adminController: AdminController;
+  quizzesController: QuizzesController;
   authMiddleware: (
     request: import('fastify').FastifyRequest,
     reply: import('fastify').FastifyReply,
@@ -24,7 +26,8 @@ export interface RouteDependencies {
 }
 
 /**
- * Routes for public pages, auth, settings, the social layer, and admin.
+ * Routes for public pages, auth, settings, the social layer, admin, and the
+ * timed practice-test flow.
  */
 export async function registerRoutes(
   app: FastifyInstance,
@@ -35,6 +38,7 @@ export async function registerRoutes(
     usersController,
     notificationsController,
     adminController,
+    quizzesController,
     authMiddleware,
     adminMiddleware,
   }: RouteDependencies,
@@ -133,6 +137,28 @@ export async function registerRoutes(
     '/notifications/read',
     { preHandler: authMiddleware },
     notificationsController.markAllRead.bind(notificationsController),
+  );
+
+  // Timed practice-test flow (all require an authenticated session)
+  app.get(
+    '/tests',
+    { preHandler: authMiddleware },
+    quizzesController.showCatalog.bind(quizzesController),
+  );
+  app.get(
+    '/tests/:slug/take',
+    { preHandler: authMiddleware },
+    quizzesController.takeTest.bind(quizzesController),
+  );
+  app.post(
+    '/tests/:attemptId/submit',
+    { preHandler: authMiddleware },
+    quizzesController.submitTest.bind(quizzesController),
+  );
+  app.get(
+    '/tests/:attemptId/result',
+    { preHandler: authMiddleware },
+    quizzesController.showResult.bind(quizzesController),
   );
 
   // Admin (role-gated)

@@ -40,6 +40,15 @@ interface AttemptRow {
   status: AttemptStatus;
 }
 
+interface AnswerRow {
+  attempt_id: string;
+  question_id: string;
+  question_index: number;
+  chosen_index: number | null;
+  is_correct: number;
+  time_ms: number | null;
+}
+
 const ATTEMPT_COLUMNS = `id, user_id, test_type_id, section_id, started_at, finished_at,
   correct_count, reached_count, total_questions, elapsed_ms, status`;
 
@@ -57,6 +66,17 @@ function mapAttempt(row?: AttemptRow): Attempt | null {
     totalQuestions: row.total_questions,
     elapsedMs: row.elapsed_ms,
     status: row.status,
+  };
+}
+
+function mapAnswer(row: AnswerRow): AttemptAnswer {
+  return {
+    attemptId: row.attempt_id,
+    questionId: row.question_id,
+    questionIndex: row.question_index,
+    chosenIndex: row.chosen_index,
+    isCorrect: row.is_correct,
+    timeMs: row.time_ms,
   };
 }
 
@@ -154,13 +174,15 @@ export class AttemptsRepository {
       );
   }
 
+  /** All recorded answers for an attempt, in presented order. */
   answersFor(attemptId: string): AttemptAnswer[] {
-    return this.db
+    const rows = this.db
       .prepare(
         `SELECT attempt_id, question_id, question_index, chosen_index, is_correct, time_ms
          FROM attempt_answers WHERE attempt_id = ? ORDER BY question_index`,
       )
-      .all(attemptId) as AttemptAnswer[];
+      .all(attemptId) as AnswerRow[];
+    return rows.map(mapAnswer);
   }
 
   hasAnswers(attemptId: string): boolean {

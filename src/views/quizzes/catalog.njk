@@ -1,0 +1,50 @@
+{% extends "layouts/base.njk" %}
+{% import "components/forms.njk" as forms %}
+
+{% block content %}
+<div class="grid gap-6">
+  <div>
+    <h1 class="font-heading text-2xl font-semibold text-ink">Practice tests</h1>
+    <p class="mt-1 text-sm text-muted">Take a timed practice test. Answers are graded by the server — there is no going back once you answer.</p>
+  </div>
+
+  {% if error %}
+    {{ forms.alert(error, 'danger') }}
+  {% endif %}
+
+  {% if tests.length === 0 %}
+    <section class="{{ ui.cardClass }}">
+      <p class="text-sm text-muted">No practice tests are available yet. Check back soon.</p>
+    </section>
+  {% else %}
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% for test in tests %}
+        <section class="{{ ui.cardClass }}">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
+              <h2 class="font-heading text-lg font-semibold text-ink">{{ test.name }}</h2>
+              <p class="text-xs text-muted">by {{ test.publisher }}</p>
+            </div>
+            {% if test.noGoingBack %}
+              <span class="{{ ui.badgeClass('info') }}">No going back</span>
+            {% endif %}
+          </div>
+          <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <dt class="text-xs text-muted">Questions</dt>
+              <dd class="font-medium text-ink">{{ test.questionCount }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted">Time</dt>
+              <dd class="font-medium text-ink">{{ (test.durationSeconds / 60) | round(0, 'floor') }} min</dd>
+            </div>
+          </dl>
+          <a href="/tests/{{ test.slug }}/take" class="mt-5 inline-block">
+            <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Start test</button>
+          </a>
+        </section>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

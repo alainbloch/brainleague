@@ -1,4 +1,4 @@
-import type { TestsRepository } from '../models/testsRepository.js';
+import type { TestsRepository, TestType } from '../models/testsRepository.js';
 import type { QuestionsRepository, Question } from '../models/questionsRepository.js';
 import type { AttemptsRepository, Attempt } from '../models/attemptsRepository.js';
 
@@ -39,6 +39,36 @@ export interface AttemptResult {
   elapsedMs: number;
   timedOut: boolean;
   questionCount: number;
+}
+
+/** One row of the result report, replayed from the recorded answer. */
+export interface ReportQuestion {
+  questionId: string;
+  /** Presented (shuffled) position, matching how the user saw the deck. */
+  index: number;
+  prompt: string;
+  choices: string[];
+  categorySlug: string;
+  correctIndex: number;
+  chosenIndex: number | null;
+  /** 1 when the answer was correct AND reached within the test budget. */
+  isCorrect: number;
+  /** Client-reported solve time, clamped by the engine at submit time. */
+  timeMs: number;
+  estSeconds: number;
+  shouldHaveSkipped: boolean;
+}
+
+/** Full result-report payload: summary + per-question replay + test meta. */
+export interface AttemptReport {
+  attempt: Attempt;
+  test: TestType;
+  timedOut: boolean;
+  elapsedMs: number;
+  correctCount: number;
+  reachedCount: number;
+  questionCount: number;
+  questions: ReportQuestion[];
 }
 
 const DEFAULT_BAND_SIZE = 10;
@@ -216,6 +246,64 @@ export class QuizEngine {
       elapsedMs,
       timedOut,
       questionCount: test.questionCount,
+    };
+  }
+
+  /**
+   * Compose the result-report for a finished attempt. Ownership is enforced
+   * (returns null for an attempt that is not the caller's or not submitted);
+   * a 404 hides the attempt's existence from other users. The report replays
+   * each recorded answer so the page can show right/wrong/skip and timeMs, and
+   * flags answers where the user spent more than the expected solve time yet
+   * still missed — the "should have skipped" coaching signal. This is a read
+   * path only; it performs no writes.
+   */
+  report(attemptId: string, userId: string): AttemptReport | null {
+    const attempt = this.attempts.findByIdForUser(attemptId, userId);
+    if (!attempt || attempt.status === 'in_progress') return null;
+
+    const test = this.tests.findById(attempt.testTypeId)!;
+    const byQuestion = new Map(
+      this.questions.listForTestType(attempt.testTypeId).map((q) => [q.id, q]),
+    );
+    const answers = this.attempts.answersFor(attemptId);
+
+    // Clamp time to the test budget the same way submit() did; isCorrect is the
+    // already-graded value stored at submit time, so the report replays what was
+    // actually credited rather than re-deriving it.
+    const budgetMs = test.durationSeconds * 1000;
+    const questions: ReportQuestion[] = answers.map((a) => {
+      const q = byQuestion.get(a.questionId);
+      const timeMs = a.timeMs == null ? 0 : Math.max(0, Math.min(a.timeMs, budgetMs));
+
+      const estMs = (q?.estSeconds ?? 0) * 1000;
+      // Spent longer than the expected solve time AND did not get it right.
+      const shouldHaveSkipped = a.isCorrect === 0 && a.timeMs != null && a.timeMs > estMs;
+
+      return {
+        questionId: a.questionId,
+        index: a.questionIndex,
+        prompt: q?.prompt ?? '',
+        choices: q?.choices ?? [],
+        categorySlug: q?.categorySlug ?? '',
+        correctIndex: q?.correctIndex ?? -1,
+        chosenIndex: a.chosenIndex,
+        isCorrect: a.isCorrect,
+        timeMs,
+        estSeconds: q?.estSeconds ?? 0,
+        shouldHaveSkipped,
+      };
+    });
+
+    return {
+      attempt,
+      test,
+      timedOut: attempt.status === 'timed_out',
+      elapsedMs: attempt.elapsedMs ?? 0,
+      correctCount: attempt.correctCount,
+      reachedCount: attempt.reachedCount,
+      questionCount: test.questionCount,
+      questions,
     };
   }
 }
