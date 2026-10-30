@@ -43,9 +43,9 @@ after(async () => { await app.close(); container.close(); });
 
 test('home splash is public, describes the pitch, and links to the first test', async () => {
   const res = await request(app.server as Server).get('/').expect(200);
-  assert.match(res.text, /Who's the quickest mind in your crew\?/);
-  assert.match(res.text, /PI Cognitive Assessment/);
-  assert.match(res.text, /Challenge your friends/);
+  assert.match(res.text, /quickest mind in your crew/);
+  assert.match(res.text, /pi-cognitive-assessment/);
+  assert.match(res.text, /Take the PI Cognitive Assessment/);
   assert.match(res.text, /\/tests\/pi-cognitive-assessment\/take/);
   assert.match(res.text, /Leaderboard/);
 });

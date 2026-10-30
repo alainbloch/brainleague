@@ -1,85 +1,102 @@
 {% extends "layouts/base.njk" %}
 
 {% block content %}
-<div class="grid gap-10">
-  {# Hero -- a friendly, competitive brain-test pitch: beat your friends, not the clock alone. #}
-  <section class="mx-auto grid max-w-2xl gap-4 text-center">
-    <p class="text-xs font-semibold uppercase tracking-widest text-accent">Timed brain tests, made for friendly rivalry</p>
-    <h1 class="font-heading text-4xl font-bold leading-tight text-ink sm:text-5xl">
-      Who's the quickest mind in your crew?
+<div class="grid max-w-5xl mx-auto">
+  {# Hero — editorial type-led pitch. #}
+  <section class="border-b border-edge py-20 sm:py-28">
+    <p class="mb-4 text-sm font-medium tracking-tight text-muted">Brain League · friends competing on timed brain tests</p>
+    <h1 class="max-w-3xl font-heading text-5xl font-medium leading-[1.05] tracking-[-0.03em] text-ink sm:text-6xl">
+      Who is the quickest mind in your crew?
     </h1>
-    <p class="mx-auto max-w-xl text-sm leading-relaxed text-muted">
+    <p class="mt-6 max-w-xl text-base leading-relaxed text-muted">
       Answer as many questions as you can before the clock runs out, then see how you
-      stack up against your friends on the leaderboard. Every test is real format, real
-      pace — built so quick thinking and knowing the question types beat grinding. Take a
-      round, get your score, and one-up your crew.
+      stack up against your friends. Real format, real pace — quick thinking and knowing
+      the question types beat grinding. Take a round, get your score, one-up your crew.
     </p>
-    <div class="flex flex-wrap justify-center gap-3">
+    <div class="mt-10 flex flex-wrap items-center gap-3">
       {% if tests.length %}
         <a href="/tests/{{ tests[0].slug }}/take">
-          <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Challenge your friends →</button>
+          <button type="button" class="{{ ui.buttonClass('primary', 'md') }} px-6">Take the {{ tests[0].name }} →</button>
         </a>
       {% endif %}
       <a href="/tests">
-        <button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Browse all tests</button>
+        <button type="button" class="{{ ui.buttonClass('secondary', 'md') }} px-6">Browse all tests</button>
       </a>
     </div>
   </section>
 
-  {# Test catalog cards. #}
-  <section class="grid gap-4">
-    <h2 class="font-heading text-xl font-semibold text-ink">Pick a brain test and go head-to-head</h2>
-    {% if not tests.length %}
-      <p class="text-sm text-muted">No practice tests are available yet. Check back soon.</p>
-    {% else %}
-      <div class="grid gap-4 sm:grid-cols-2">
-        {% for test in tests %}
-          <section class="{{ ui.cardClass }}">
-            <div class="flex items-start justify-between gap-4">
-              <div class="min-w-0">
-                <h3 class="font-heading text-lg font-semibold text-ink">{{ test.name }}</h3>
-                <p class="text-xs text-muted">by {{ test.publisher }}</p>
-              </div>
-              {% if test.noGoingBack %}
-                <span class="{{ ui.badgeClass('info') }}">No going back</span>
-              {% endif %}
-            </div>
-            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <span class="block text-xs text-muted">Questions</span>
-                <span class="font-medium text-ink">{{ test.questionCount }}</span>
-              </div>
-              <div>
-                <span class="block text-xs text-muted">Time</span>
-                <span class="font-medium text-ink">{{ (test.durationSeconds / 60) | round(0, 'floor') }} min</span>
-              </div>
-            </dl>
-            <div class="mt-5 flex flex-wrap gap-2">
-              <a href="/tests/{{ test.slug }}/take">
-                <button type="button" class="{{ ui.buttonClass('primary', 'md') }}">Take the test</button>
-              </a>
-              <a href="/tests/{{ test.slug }}/leaderboard">
-                <button type="button" class="{{ ui.buttonClass('secondary', 'md') }}">Leaderboard</button>
-              </a>
-            </div>
-          </section>
-        {% endfor %}
+  {# Feature sections — editorial numbered blocks. #}
+  <section class="grid gap-14 py-16 sm:py-20">
+    {% for f in [
+      { num: '01', title: 'Built for timed tests, made for rivalry', body: 'Practice at the real pace so the clock feels familiar. Then put your score on the leaderboard and see exactly who beats who — your friends, your rivals, everyone.' },
+      { num: '02', title: 'Learn the question types on sight', body: 'Analogies, word problems, number series and more. Tease apart how each one works, so you recognize them fast and let go the moment you are stuck.' },
+      { num: '03', title: 'Compete, track, and improve together', body: 'Friend leaderboards and score alerts turn solo prep into a running battle. Watch your rank climb as you one-up the people you know.' }
+    ] %}
+      <div class="grid gap-6 sm:grid-cols-12 sm:gap-10">
+        <div class="sm:col-span-3">
+          <p class="text-sm font-medium tracking-tight text-muted">{{ f.num }}</p>
+        </div>
+        <div class="sm:col-span-8">
+          <h2 class="font-heading text-2xl font-medium tracking-[-0.02em] text-ink sm:text-3xl">{{ f.title }}</h2>
+          <p class="mt-3 max-w-xl text-base leading-relaxed text-muted">{{ f.body }}</p>
+        </div>
       </div>
-    {% endif %}
+    {% endfor %}
   </section>
 
-  {# How it works + value props. #}
-  <section class="grid gap-4 sm:grid-cols-3">
-    {% for feature in [
-      { title: "Real pace, real pressure", body: "Practice at test speed so the clock feels familiar — out-answer your friends where it counts." },
-      { title: "Learn the question types", body: "Get tips on spotting analogies, word problems, number series and more before they eat your time." },
-      { title: "Compete with your crew", body: "Friend leaderboards and score alerts turn solo prep into a running battle with the people you know." }
-    ] %}
-      <section class="{{ ui.cardClass }}">
-        <h4 class="font-heading text-sm font-semibold text-ink">{{ feature.title }}</h4>
-        <p class="mt-1 text-sm text-muted">{{ feature.body }}</p>
-      </section>
-    {% endfor %}
+  {# Test catalog — the available rounds. #}
+  <section class="border-t border-edge py-16 sm:py-20">
+    <div class="grid gap-6 sm:grid-cols-12 sm:gap-10">
+      <div class="sm:col-span-3">
+        <p class="text-sm font-medium tracking-tight text-muted">Available</p>
+      </div>
+      <div class="sm:col-span-8">
+        <h2 class="font-heading text-2xl font-medium tracking-[-0.02em] text-ink sm:text-3xl">
+          Pick a brain test and go head-to-head
+        </h2>
+        <div class="mt-8 grid gap-px overflow-hidden border border-edge bg-edge">
+          {% if not tests.length %}
+            <p class="bg-surface p-6 text-sm text-muted">No practice tests are available yet — check back soon.</p>
+          {% else %}
+            {% for test in tests %}
+              <div class="flex flex-wrap items-center justify-between gap-4 bg-surface px-6 py-5">
+                <div class="min-w-0">
+                  <h3 class="font-heading text-lg font-medium text-ink">{{ test.name }}</h3>
+                  <p class="mt-0.5 text-sm text-muted">
+                    {{ test.questionCount }} questions · {{ (test.durationSeconds / 60) | round(0, 'floor') }} min · by {{ test.publisher }}
+                  </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <a href="/tests/{{ test.slug }}/leaderboard" class="text-sm font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline">Leaderboard</a>
+                  <a href="/tests/{{ test.slug }}/take">
+                    <button type="button" class="{{ ui.buttonClass('primary', 'sm') }}">Take the test</button>
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# Tools to keep the rivalry going. #}
+  <section class="border-t border-edge py-16 sm:py-20">
+    <div class="grid gap-6 sm:grid-cols-12 sm:gap-10">
+      <div class="sm:col-span-3">
+        <p class="text-sm font-medium tracking-tight text-muted">More</p>
+      </div>
+      <div class="sm:col-span-8 grid gap-px overflow-hidden border border-edge bg-edge sm:grid-cols-2">
+        <a href="/leaderboards" class="group grid bg-surface p-6 hover:bg-fill">
+          <h3 class="font-heading text-lg font-medium text-ink group-hover:underline">Leaderboards</h3>
+          <p class="mt-1 text-sm text-muted">See where everyone ranks, global and friends.</p>
+        </a>
+        <a href="/tutorials" class="group grid bg-surface p-6 hover:bg-fill">
+          <h3 class="font-heading text-lg font-medium text-ink group-hover:underline">Tips & tutorials</h3>
+          <p class="mt-1 text-sm text-muted">Ace each question type on sight.</p>
+        </a>
+      </div>
+    </div>
   </section>
 </div>
 {% endblock %}
