@@ -96,3 +96,14 @@ test('help (tutorials) page lists seeded categories and a category filter works'
   const detail = await request(app.server as Server).get('/tutorials/analogies-help').set('Cookie', cookie).expect(200);
   assert.match(detail.text, /Look for part\/whole/);
 });
+test('About is public and offers the appropriate next step for each session', async () => {
+  const visitor = await request(app.server as Server).get('/about').expect(200);
+  assert.match(visitor.text, /CasperLabs/);
+  assert.match(visitor.text, /My wife and I/);
+  assert.match(visitor.text, /aria-current="page"/);
+  assert.match(visitor.text, /Join BrainLeague/);
+  const cookie = await signupCookie('About Reader', 'about-reader@example.com');
+  const member = await request(app.server as Server).get('/about').set('Cookie', cookie).expect(200);
+  assert.match(member.text, /Find your next test/);
+  assert.doesNotMatch(member.text, /Join BrainLeague/);
+});

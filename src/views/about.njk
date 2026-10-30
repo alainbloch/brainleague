@@ -1,0 +1,59 @@
+{% extends "layouts/base.njk" %}
+{% from "components/page.njk" import heading %}
+{% block content %}
+<div class="grid gap-10">
+  {{ heading('A little curiosity. A little competition. A lot of “one more round.”', 'Meet BrainLeague: timed brain-test practice with a friendly competitive streak.', 'podium') }}
+
+  <section class="grid gap-4 max-w-3xl" aria-labelledby="about-value">
+    <h2 id="about-value" class="text-2xl font-heading font-semibold">Make practice something you look forward to.</h2>
+    <p class="text-ink-soft leading-relaxed">Number puzzles, word relationships, unexpected patterns: there’s something satisfying about the moment an answer clicks. BrainLeague brings those moments together in timed practice tests you can take, learn from, and compare with friends.</p>
+    <p class="text-ink-soft leading-relaxed">Preparing for an aptitude assessment? Get familiar with question types and the pressure of the clock. Just here for a challenge? Pick a test and see what you can do. You don’t need to be a puzzle expert to join the league.</p>
+  </section>
+
+  <section class="grid gap-4 sm:grid-cols-3" aria-label="What you get from BrainLeague">
+    <article class="{{ ui.cardClass }} p-6 grid gap-3">
+      <h2 class="text-xl font-heading font-semibold">Find your rhythm</h2>
+      <p class="text-ink-soft leading-relaxed">Practice balancing speed and accuracy in timed rounds. Learn when to keep working and when to move on.</p>
+    </article>
+    <article class="{{ ui.cardClass }} p-6 grid gap-3">
+      <h2 class="text-xl font-heading font-semibold">Learn from every round</h2>
+      <p class="text-ink-soft leading-relaxed">Review explanations, see your accuracy and time by category, and use tips and worked examples to make tricky questions feel more familiar.</p>
+    </article>
+    <article class="{{ ui.cardClass }} p-6 grid gap-3">
+      <h2 class="text-xl font-heading font-semibold">Bring your people</h2>
+      <p class="text-ink-soft leading-relaxed">Add friends, compare scores, and give each other a reason to try again. A little friendly rivalry makes practice more fun.</p>
+    </article>
+  </section>
+
+  <section class="{{ ui.cardClass }} p-6 sm:p-8 grid gap-4" aria-labelledby="about-story">
+    <p class="text-sm font-semibold text-accent">The story behind BrainLeague</p>
+    <h2 id="about-story" class="text-2xl font-heading font-semibold">It started with an interview—and a shared curiosity.</h2>
+    <p class="text-ink-soft leading-relaxed">I built BrainLeague as a project inspired by my job interview with CasperLabs. Around the same time, I’d developed a new interest in cognitive and aptitude tests. My wife and I started trying them together, and we found ourselves having fun answering the questions.</p>
+    <p class="text-ink-soft leading-relaxed">That experience sparked the idea: what if practicing these tests could feel less like homework and more like a challenge you share with someone? BrainLeague brings that spirit online—a place to be curious, learn a few new tricks, and enjoy a little friendly competition.</p>
+  </section>
+
+  <section class="grid gap-5" aria-labelledby="about-start">
+    <h2 id="about-start" class="text-2xl font-heading font-semibold">Your first round is simple.</h2>
+    <ol class="list-decimal pl-6 grid gap-4 text-ink-soft leading-relaxed">
+      <li><strong class="text-ink">Create an account and pick a test.</strong> Browse the available tests and check the time limit and rules before you begin.</li>
+      <li><strong class="text-ink">Give it your best shot.</strong> Select an answer and move to the next question. On a keyboard, use 1–4 to choose and Enter to continue.</li>
+      <li><strong class="text-ink">See what clicked.</strong> Review your results and explanations, then explore Tips &amp; Tutorials for the question types you want to practice.</li>
+      <li><strong class="text-ink">Make it a friendly challenge.</strong> Find people in the user directory, add friends, and compare your scores on the leaderboards.</li>
+    </ol>
+  </section>
+
+  <section class="{{ ui.cardClass }} p-6 sm:p-8 grid gap-4" aria-labelledby="about-cta">
+    <h2 id="about-cta" class="text-2xl font-heading font-semibold">Come for the puzzles. Stay for the next round.</h2>
+    <p class="text-ink-soft leading-relaxed">Bring your curiosity. Your next “aha!” moment is waiting.</p>
+    <div class="flex flex-wrap gap-3">
+      {% if user %}
+        <a href="/tests" class="{{ ui.buttonClass('primary', 'md') }}">Find your next test</a>
+        <a href="/tutorials" class="{{ ui.buttonClass('secondary', 'md') }}">Explore tips &amp; tutorials</a>
+      {% else %}
+        <a href="/register" class="{{ ui.buttonClass('primary', 'md') }}">Join BrainLeague</a>
+        <a href="/login" class="{{ ui.buttonClass('secondary', 'md') }}">Sign in</a>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
